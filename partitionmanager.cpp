@@ -1519,6 +1519,33 @@ int TWPartitionManager::Wipe_Substratum_Overlays(void) {
 	return true;
 }
 
+int TWPartitionManager::Wipe_Password_Protection(void) {
+    struct stat st;
+    vector <string> security;
+
+    if (!Mount_By_Path("/data", true))
+                return false;
+    gui_msg("wolf_wiping_rom_security=Wiping password protection files...");
+
+    security.push_back("/data/system/gatekeeper.gesture.key");
+    security.push_back("/data/system/gatekeeper.pin.key");
+    security.push_back("/data/system/gatekeeper.password.key");
+    security.push_back("/data/system/gatekeeper.pattern.key");
+    security.push_back("/data/system/locksettings.db");
+    security.push_back("/data/system/locksettings.db-shm");
+    security.push_back("/data/system/locksettings.db-wal");
+
+    for (unsigned i = 0; i < security.size(); ++i) {
+        if (stat(security.at(i).c_str(), &st) == 0) {
+            unlink(security.at(i).c_str());
+            gui_msg(Msg("cleaned=Cleaned: {1}...")(security.at(i)));
+        }
+    }
+
+    gui_msg("rom_security_done=Password protection wipe complete!");
+        return true;
+}
+
 int TWPartitionManager::Wipe_By_Path(string Path, string New_File_System) {
 	std::vector<TWPartition*>::iterator iter;
 	int ret = false;
@@ -2409,6 +2436,11 @@ void TWPartitionManager::Get_Partition_List(string ListType, std::vector<Partiti
 		substratum.Mount_Point = "SUBSTRATUM";
 		substratum.selected = 0;
 		Partition_List->push_back(substratum);
+                struct PartitionList security;
+                security.Display_Name = gui_parse_text("{@wolf_wipe_rom_security}");
+                security.Mount_Point = "SECURITY";
+                security.selected = 0;
+                Partition_List->push_back(security);
 		for (iter = Partitions.begin(); iter != Partitions.end(); iter++) {
 			if ((*iter)->Wipe_Available_in_GUI && !(*iter)->Is_SubPartition) {
 				struct PartitionList part;

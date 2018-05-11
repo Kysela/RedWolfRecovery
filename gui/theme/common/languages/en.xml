@@ -835,5 +835,9 @@
     <string name="already_patched"> * Boot Image Already Patched...</string>
     <string name="restore_msg"> - Apps will be installed on boot..! -</string>
     <string name="restore_app_finished">[RESTORE FINISHED]</string>
+    <string name="wolf_wipe_rom_security">Password protection</string>
+    <string name="wolf_security_wipe_err">Failed to wipe password protection</string>
+    <string name="wolf_wiping_rom_security">Wiping password protection files...</string>
+    <string name="rom_security_done">Password protection wipe complete!</string>
      </resources>
 </language>

@@ -855,7 +855,7 @@ int GUIAction::checkpartitionlist(std::string arg)
 		while (end_pos != string::npos && start_pos < List.size()) {
 			part_path = List.substr(start_pos, end_pos - start_pos);
 			LOGINFO("checkpartitionlist part_path '%s'\n", part_path.c_str());
-			if (part_path == "/and-sec" || part_path == "DALVIK" || part_path == "INTERNAL" || part_path == "SUBSTRATUM") {
+			if (part_path == "/and-sec" || part_path == "DALVIK" || part_path == "INTERNAL" || part_path == "SUBSTRATUM" || part_path == "SECURITY") {
 				// Do nothing
 			} else {
 				count++;
@@ -884,7 +884,7 @@ int GUIAction::getpartitiondetails(std::string arg)
 		while (end_pos != string::npos && start_pos < List.size()) {
 			part_path = List.substr(start_pos, end_pos - start_pos);
 			LOGINFO("getpartitiondetails part_path '%s'\n", part_path.c_str());
-			if (part_path == "/and-sec" || part_path == "DALVIK" || part_path == "INTERNAL" || part_path == "SUBSTRATUM") {
+			if (part_path == "/and-sec" || part_path == "DALVIK" || part_path == "INTERNAL" || part_path == "SUBSTRATUM" || part_path == "SECURITY") {
 				// Do nothing
 			} else {
 				DataManager::SetValue("tw_partition_path", part_path);
@@ -1144,7 +1144,14 @@ int GUIAction::wipe(std::string arg)
 							gui_msg("substratum_done=-- Substratum Overlays Wipe Complete!");
 							skip = true;
 						}
-						
+                                        } else if (wipe_path == "SECURITY") {
+                                                if (!PartitionManager.Wipe_Password_Protection()) {
+                                                        gui_err("wolf_security_wipe_err=Failed to wipe Password protection");
+                                                        ret_val = false;
+                                                        break;
+                                                } else {
+                                                        skip = true;
+                                                }					
 					} else if (wipe_path == "INTERNAL") {
 						if (!PartitionManager.Wipe_Media_From_Data()) {
 							ret_val = false;

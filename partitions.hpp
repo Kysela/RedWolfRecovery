@@ -312,6 +312,7 @@ public:
 	int Wipe_Dalvik_Cache();                                                  // Wipes dalvik cache
 	int Wipe_Substratum_Overlays();                                           // Wipe substratum overlays
         int Wipe_Rotate_Data();                                                   // Wipes rotation data --
+	int Wipe_Password_Protection();                                           // Remove password protection i.e. Lock screen password/pattern
 	int Wipe_Battery_Stats();                                                 // Wipe battery stats -- /data/system/batterystats.bin
 	int Wipe_Android_Secure();                                                // Wipes android secure
 	int Format_Data();                                                        // Really formats data on /data/media devices -- also removes encryption
@@ -331,7 +332,7 @@ public:
 	void Clean_Backup_Folder(string Backup_Folder);                           // Clean Backup Folder on Error
 	int Fix_Contexts();
 	void Get_Partition_List(string ListType, std::vector<PartitionList> *Partition_List);
-    void Get_App_List(string ListType, std::vector<AppList> *App_List);
+	void Get_App_List(string ListType, std::vector<AppList> *App_List);
 	int Fstab_Processed();                                                    // Indicates if the fstab has been processed or not
 	void Output_Storage_Fstab();                                              // Creates a /cache/recovery/storage.fstab file with a list of all potential storage locations for app use
 	bool Enable_MTP();                                                        // Enables MTP
