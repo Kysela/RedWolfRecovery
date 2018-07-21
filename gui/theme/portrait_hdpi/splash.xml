@@ -14,10 +14,10 @@
 
 	<pages>
 		<page name="splash">
-			<object type="image">
-				<image resource="splash"/>
+			<image>
 				<placement x="0" y="0"/>
-			</object>
+				<image resource="splash"/>
+			</image>
 </page>
 </pages>
 </recovery>

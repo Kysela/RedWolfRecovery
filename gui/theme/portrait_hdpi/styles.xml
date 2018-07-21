@@ -215,7 +215,7 @@
 		<style name="fileselector_b">
 			<fastscroll rectcolor="%accent%" w="%fastscroll_w%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
 			<separator color="%linecolor%" height="%fileselector_separatorheight%" />
-			<icon folder="folder_icon" file="file_icon" />
+			<icon fileselected="file_icon_sel" fileunselected="file_icon" dirselected="folder_icon_sel" dirunselected="folder_icon" zipselected="zip_icon_sel" zipunselected="zip_icon_unsel"/>
 			<background color="%background%" />
 			<font resource="status" spacing="%fileselector_spacing%" color="%text%" highlightcolor="%accent%" />
 		</style>
@@ -223,7 +223,7 @@
 		<style name="fileselector_s">
 			<fastscroll rectcolor="%accent%" w="%fastscroll_w%" rectw="%fastscroll_rectw%" recth="%fastscroll_recth%" />
 			<separator color="%linecolor%" height="%fileselector_separatorheight%" />
-			<icon folder="folder_icon" file="file_icon" />
+			<icon fileselected="file_icon_sel" fileunselected="file_icon" dirselected="folder_icon_sel" dirunselected="folder_icon" zipselected="zip_icon_sel" zipunselected="zip_icon_unsel"/>
 			<background color="%background%" />
 			<font resource="caption" spacing="%fileselector_spacing%" color="%text%" highlightcolor="%accent%" />
 		</style>

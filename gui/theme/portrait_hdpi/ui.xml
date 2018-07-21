@@ -50,8 +50,6 @@
         <image name="ic_lock_outline" filename="ic_lock_outline" retainaspect="1"/>
         <image name="ic_lock_unlocked_outline" filename="ic_lock_unlocked_outline" retainaspect="1"/>
         <image name="wolf_governors" filename="wolf_governors" retainaspect="1"/>
-        <image name="wolf_traffic_light_1" filename="wolf_traffic_light_1" retainaspect="1"/>
-        <image name="wolf_traffic_light_2" filename="wolf_traffic_light_2" retainaspect="1"/>
         <image name="wolf_on_boot_1" filename="wolf_on_boot_1" retainaspect="1"/>
         <image name="wolf_on_boot_2" filename="wolf_on_boot_2" retainaspect="1"/>
         <image name="android_debug_bridge_wolf" filename="android_debug_bridge_wolf" retainaspect="1"/>
@@ -173,6 +171,10 @@
 
 		<image name="file_icon" filename="file" retainaspect="1"/>
 		<image name="folder_icon" filename="folder" retainaspect="1"/>
+		<image name="file_icon_sel" filename="filesel" retainaspect="1"/>
+		<image name="folder_icon_sel" filename="foldersel" retainaspect="1"/>
+		<image name="zip_icon_sel" filename="zip_icon_sel" retainaspect="1"/>
+		<image name="zip_icon_unsel" filename="zip_icon_unsel" retainaspect="1"/>
 		<image name="unlock_icon" filename="unlock_icon" retainaspect="1"/>
 
 		<animation name="progress" filename="indeterminate"/>
@@ -231,6 +233,8 @@
 		<image name="tab_misc_a" filename="tab_misc_a" retainaspect="1"/>
 		<image name="tab_display" filename="tab_display" retainaspect="1"/>
 		<image name="tab_display_a" filename="tab_display_a" retainaspect="1"/>
+		<image name="tab_language" filename="tab_language" retainaspect="1"/>
+		<image name="tab_language_a" filename="tab_language_a" retainaspect="1"/>
 		<image name="tab_time" filename="tab_time" retainaspect="1"/>
 		<image name="tab_time_a" filename="tab_time_a" retainaspect="1"/>
 		<image name="tab_vibration" filename="tab_vibration" retainaspect="1"/>
@@ -542,7 +546,7 @@
 
 		<variable name="listbox_tz_height" value="630"/>
 		<variable name="listbox_tz_width" value="984"/>
-		<variable name="listbox_settings_height" value="720"/>
+		<variable name="listbox_settings_height" value="1220"/>
 		<variable name="listbox_settings_mf_height" value="360"/>
 		<variable name="listbox_settings_mv_height" value="450"/>
 		<variable name="listbox_settings_lang_height" value="360"/>
@@ -604,12 +608,12 @@
 
 <action>
 				<touch key="power+volup"/>
-				<action function="screenshotexternal"/>
+				<action function="screenshot"/>
 			</action>
 
 <action>
 				<touch key="power+voldown"/>
-				<action function="screenshotinternal"/>
+				<action function="screenshot"/>
 			</action>
 
 </template>
@@ -697,7 +701,7 @@
 			<animation>
 				<placement x="%progressbar_x%" y="%progressbar_y%"/>
 				<resource name="progress"/>
-				<speed fps="24" render="2"/>
+				<speed fps="30" render="2"/>
 				<loop frame="1"/>
 			</animation>
 		</template>

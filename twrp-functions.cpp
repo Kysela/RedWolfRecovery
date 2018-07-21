@@ -98,24 +98,14 @@ int TWFunc::Exec_Cmd(const string& cmd) {
 
 // Returns "file.name" from a full /path/to/file.name
 string TWFunc::Get_Filename(const string& Path) {
-	size_t pos = Path.find_last_of("/");
-	if (pos != string::npos) {
-		string Filename;
-		Filename = Path.substr(pos + 1, Path.size() - pos - 1);
-		return Filename;
-	} else
-		return Path;
+size_t pos = Path.find_last_of("/");
+return (pos != string::npos ? Path.substr(pos + 1, Path.size() - pos - 1) : Path);
 }
 
 // Returns "/path/to/" from a full /path/to/file.name
 string TWFunc::Get_Path(const string& Path) {
-	size_t pos = Path.find_last_of("/");
-	if (pos != string::npos) {
-		string Pathonly;
-		Pathonly = Path.substr(0, pos + 1);
-		return Pathonly;
-	} else
-		return Path;
+size_t pos = Path.find_last_of("/");
+return (pos != string::npos ? Path.substr(0, pos + 1) : Path);
 }
 
 int TWFunc::Wait_For_Child(pid_t pid, int *status, string Child_Name) {
@@ -178,13 +168,11 @@ int TWFunc::Wait_For_Child_Timeout(pid_t pid, int *status, const string& Child_N
 	return 0;
 }
 
-bool TWFunc::Path_Exists(string Path) {
+bool TWFunc::Path_Exists(const string Path) {
 	struct stat st;
-	if (stat(Path.c_str(), &st) != 0)
-		return false;
-	else
-		return true;
+	return (stat(Path.c_str(), &st) == 0);
 }
+
 
 Archive_Type TWFunc::Get_File_Type(string fn) {
 	string::size_type i = 0;
@@ -299,6 +287,7 @@ int TWFunc::Try_Decrypting_File(string fn, string password, bool Display_Error) 
 		}
 	}
 	free(buffer_out);
+	if (Display_Error) 
 	LOGINFO("No errors decrypting '%s' but no known file format.\n", fn.c_str());
 	return 1; // Decrypted successfully
 #else
@@ -308,11 +297,8 @@ int TWFunc::Try_Decrypting_File(string fn, string password, bool Display_Error) 
 }		
 
 unsigned long TWFunc::Get_File_Size(const string& Path) {
-	struct stat st;
-
-	if (stat(Path.c_str(), &st) != 0)
-		return 0;
-	return st.st_size;
+struct stat st;
+return (stat(Path.c_str(), &st) != 0 ? 0 : st.st_size);
 }
 
 std::string TWFunc::Remove_Trailing_Slashes(const std::string& path, bool leaveLast)
@@ -540,6 +526,15 @@ void TWFunc::Update_Log_File(void) {
 		chown("/cache/recovery/log", 1000, 1000);
 		chmod("/cache/recovery/log", 0600);
 		chmod("/cache/recovery/last_log", 0640);
+		if (TWFunc::Path_Exists(TMP_INSTALL_STATUS)) {
+		std::ifstream old_file(TMP_INSTALL_STATUS);
+		std::ofstream new_file("/cache/recovery/last_status");
+		string contents;
+		getline(old_file, contents);
+		new_file << contents << '\n';
+		chown("/cache/recovery/last_status", 1000, 1000);
+		chmod("/cache/recovery/last_status", 0640);
+		}
 	} else if (PartitionManager.Mount_By_Path("/data", false) && TWFunc::Path_Exists("/data/cache/recovery/.")) {
 		Copy_Log(TMP_LOG_FILE, "/data/cache/recovery/log");
 		copy_file("/data/cache/recovery/log", "/data/cache/recovery/last_log", 600);
@@ -564,10 +559,9 @@ void TWFunc::Update_Log_File(void) {
 	}
 
 	if (PartitionManager.Mount_By_Path("/cache", false)) {
-		if (unlink("/cache/recovery/command") && errno != ENOENT) {
+		if (unlink("/cache/recovery/command") == -1 && errno != ENOENT)
 			LOGINFO("Can't unlink %s\n", "/cache/recovery/command");
-		}
-	}
+		}	
 
 	sync();
 }
@@ -633,14 +627,14 @@ int TWFunc::tw_reboot(RebootCommand command)
 
 void TWFunc::check_and_run_script(const char* script_file, const char* display_name)
 {
-	#ifdef RW_ALLOW_HELPER_SCRIPTS
 	// Check for and run startup script if script exists
 	struct stat st;
 	if (stat(script_file, &st) == 0) {
+		gui_msg(Msg("run_script=Running {1} script...")(display_name));
 		chmod(script_file, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 		TWFunc::Exec_Cmd(script_file);
+		gui_msg("done=Done.");
 	}
-	#endif
 }
 
 int TWFunc::removeDir(const string path, bool skipParent) {
@@ -694,9 +688,7 @@ int TWFunc::copy_file(string src, string dst, int mode) {
 	dstfile << srcfile.rdbuf();
 	srcfile.close();
 	dstfile.close();
-	if (chmod(dst.c_str(), mode) != 0)
-		return -1;
-	return 0;
+	return (chmod(dst.c_str(), mode) != 0 ? -1 : 0);
 }
 
 unsigned int TWFunc::Get_D_Type_From_Stat(string Path) {
@@ -823,59 +815,34 @@ string TWFunc::Get_Current_Date() {
 string TWFunc::System_Property_Get(string Prop_Name) {
 	bool mount_state = PartitionManager.Is_Mounted_By_Path("/system");
 	std::vector<string> buildprop;
-	string propvalue;
 	if (!PartitionManager.Mount_By_Path("/system", true))
-		return propvalue;
+		return "";
 	string prop_file = "/system/build.prop";
 	if (!TWFunc::Path_Exists(prop_file))
-		prop_file = "/system/system/build.prop"; // for devices with system as a root file system (e.g. Pixel)
+		prop_file = "/system" + prop_file; // for devices with system as a root file system (e.g. Pixel)
 	if (TWFunc::read_file(prop_file, buildprop) != 0) {
-		LOGINFO("Unable to open /system/build.prop for getting '%s'.\n", Prop_Name.c_str());
+		LOGINFO("Unable to open '%s' for getting '%s'.\n", prop_file.c_str(), Prop_Name.c_str());
 		DataManager::SetValue(TW_BACKUP_NAME, Get_Current_Date());
 		if (!mount_state)
 			PartitionManager.UnMount_By_Path("/system", false);
-		return propvalue;
+		return "";
 	}
-	int line_count = buildprop.size();
-	int index;
-	size_t start_pos = 0, end_pos;
-	string propname;
-	for (index = 0; index < line_count; index++) {
-		end_pos = buildprop.at(index).find("=", start_pos);
-		propname = buildprop.at(index).substr(start_pos, end_pos);
-		if (propname == Prop_Name) {
-			propvalue = buildprop.at(index).substr(end_pos + 1, buildprop.at(index).size());
+	size_t end_pos;
+	for (size_t i=0;i<buildprop.size();i++) {
+	if (buildprop.at(i)[0] != Prop_Name[0])
+		continue;
+		end_pos = buildprop.at(i).find("=", 0);
+		if (buildprop.at(i).substr(0, end_pos) == Prop_Name) {
 			if (!mount_state)
 				PartitionManager.UnMount_By_Path("/system", false);
-			return propvalue;
+			return buildprop.at(i).substr(end_pos + 1, string::npos);
 		}
 	}
 	if (!mount_state)
 		PartitionManager.UnMount_By_Path("/system", false);
-	return propvalue;
+	return "";
 }
 
-string TWFunc::File_Property_Get(string File_Path, string Prop_Name) {
- std::vector<string> buildprop;
- string propvalue;
- string prop_file = File_Path;
- if (TWFunc::read_file(prop_file, buildprop) != 0) {
-		return propvalue;
-	}
-  int line_count = buildprop.size();
- int index;
- size_t start_pos = 0, end_pos;
- string propname;
- for (index = 0; index < line_count; index++) {
-  end_pos = buildprop.at(index).find("=", start_pos);
-  propname = buildprop.at(index).substr(start_pos, end_pos);
-  if (propname == Prop_Name) {
-   propvalue = buildprop.at(index).substr(end_pos + 1, buildprop.at(index).size());
-    return propvalue;
-  }
- }
- return propvalue;
-}
 
 
 void TWFunc::Auto_Generate_Backup_Name() {
@@ -1081,16 +1048,21 @@ bool TWFunc::Create_Dir_Recursive(const std::string& path, mode_t mode, uid_t ui
 int TWFunc::Set_Brightness(std::string brightness_value)
 {
 	int result = -1;
-	std::string secondary_brightness_file;
 
 	if (DataManager::GetIntValue("tw_has_brightnesss_file")) {
+		brightness_value = std::to_string(DataManager::GetIntValue("tw_brightness_max") * (int)atoi(brightness_value.c_str()) / 100);
 		LOGINFO("TWFunc::Set_Brightness: Setting brightness control to %s\n", brightness_value.c_str());
 		result = TWFunc::write_to_file(DataManager::GetStrValue("tw_brightness_file"), brightness_value);
+#ifdef TW_SECONDARY_BRIGHTNESS_PATH
+
+		std::string secondary_brightness_file;
 		DataManager::GetValue("tw_secondary_brightness_file", secondary_brightness_file);
 		if (!secondary_brightness_file.empty()) {
 			LOGINFO("TWFunc::Set_Brightness: Setting secondary brightness control to %s\n", brightness_value.c_str());
 			TWFunc::write_to_file(secondary_brightness_file, brightness_value);
-		}
+		}		
+#endif
+
 	}
 	return result;
 }
@@ -1114,13 +1086,7 @@ bool TWFunc::Toggle_MTP(bool enable) {
 }
 
 void TWFunc::SetPerformanceMode(bool mode) {
-	if (mode) {
-		property_set("recovery.perf.mode", "1");
-	} else {
-		property_set("recovery.perf.mode", "0");
-	}
-	// Some time for events to catch up to init handlers
-	usleep(500000);
+property_set("recovery.perf.mode", mode ? "1" : "0");
 }
 
 std::string TWFunc::to_string(unsigned long value) {
@@ -1131,19 +1097,19 @@ std::string TWFunc::to_string(unsigned long value) {
 
 void TWFunc::Disable_Stock_Recovery_Replace(void) {
 	if (PartitionManager.Mount_By_Path("/system", false)) {
-		// Disable flashing of stock recovery
-				if (DataManager::GetIntValue(RW_ADVANCED_STOCK_REPLACE) == 1) {
-				  if (Path_Exists("/system/bin/install-recovery.sh")) 
-				     rename("/system/bin/install-recovery.sh", "/system/bin/wlfx0install-recoverybak0xwlf");    
-				if (Path_Exists("/system/etc/install-recovery.sh"))
-				  rename("/system/etc/install-recovery.sh", "/system/etc/wlfx0install-recoverybak0xwlf");
-			if (Path_Exists("/system/etc/recovery-resource.dat"))
-				    rename("/system/etc/recovery-resource.dat", "/system/etc/wlfx0recovery-resource0xwlf");
-	       }
-		if (TWFunc::Path_Exists("/system/recovery-from-boot.p")) {
-				rename("/system/recovery-from-boot.p", "/system/wlfx0recovery-from-bootbak0xwlf");
+		    struct stat st;
+		  if (0 == lstat("/system/bin/install-recovery.sh", &st)) {
+                if (st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
+                    chmod("/system/bin/install-recovery.sh", 0640);  
+                    }
+               if (0 == lstat("/system/etc/install-recovery.sh", &st)) {
+                 if (st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
+                    chmod("/system/etc/install-recovery.sh", 0640);  
+                    }
+           if (TWFunc::Path_Exists("/system/recovery-from-boot.p"))
+			rename("/system/recovery-from-boot.p", "/system/recovery-from-boot.bak");
         sync();
-		      }
+        sync();
 		PartitionManager.UnMount_By_Path("/system", false);
 	}
 }
@@ -1167,14 +1133,13 @@ unsigned long long TWFunc::IOCTL_Get_Block_Size(const char* block_device) {
 	return 0;
 }
 
-bool TWFunc::CheckWord(std::string filename, std::string search) {
+bool TWFunc::CheckWord(const string& filename, const string& search) {
     std::string line;
     ifstream File;
-    File.open (filename);
+    File.open(filename, ios::in);
     if(File.is_open()) {
-        while(!File.eof()) {
-            std::getline(File,line);
-            if (line.find(search) != string::npos) {
+          while (std::getline(File,line)) {
+            if ((line == search) || (line.find(search) != std::string::npos)) {
             File.close();
              return true;
              }
@@ -1184,10 +1149,11 @@ bool TWFunc::CheckWord(std::string filename, std::string search) {
     return false;
 }
 
-void TWFunc::Replace_Word_In_File(string file_path, string search, string word) {
-  std::string contents_of_file, local, renamed = file_path + ".wlfx";
-  if (TWFunc::Path_Exists(renamed))
-  unlink(renamed.c_str());
+void TWFunc::Replace_Word_In_File(const string& file_path, const string search, const string word) {
+  std::string contents_of_file, local;
+  const std::string renamed = file_path + ".wlfx";
+  if (unlink(renamed.c_str()) == -1 && errno != ENOENT)
+  return;
   std::rename(file_path.c_str(), renamed.c_str());
   std::ifstream old_file(renamed.c_str());
   std::ofstream new_file(file_path.c_str());
@@ -1197,12 +1163,10 @@ void TWFunc::Replace_Word_In_File(string file_path, string search, string word) 
   end_pos = search.find(";", start_pos);
   while (end_pos != string::npos && start_pos < search.size()) {
    local = search.substr(start_pos, end_pos - start_pos);
-   if (contents_of_file.find(local) != string::npos) {
       while((pos = contents_of_file.find(local, pos)) != string::npos) {
       contents_of_file.replace(pos, local.length(), word);
       pos += word.length();
-      }
-     }
+      }     
      start_pos = end_pos + 1;
      end_pos = search.find(";", start_pos);
     }
@@ -1212,25 +1176,24 @@ void TWFunc::Replace_Word_In_File(string file_path, string search, string word) 
   chmod(file_path.c_str(), 0640);  
 }
 
-void TWFunc::Replace_Word_In_File(std::string file_path, std::string search) {
-  std::string contents_of_file, local, renamed = file_path + ".wlfx";
-  if (TWFunc::Path_Exists(renamed))
-  unlink(renamed.c_str());
+void TWFunc::Replace_Word_In_File(const string& file_path, const string search) {
+  std::string contents_of_file, local;
+  const std::string renamed = file_path + ".wlfx";
+  if (unlink(renamed.c_str()) == -1 && errno != ENOENT)
+  return;
   std::rename(file_path.c_str(), renamed.c_str());
   std::ifstream old_file(renamed.c_str());
   std::ofstream new_file(file_path.c_str());
-  size_t start_pos, end_pos, pos;
+  size_t start_pos, end_pos;
   while (std::getline(old_file, contents_of_file)) {
-  start_pos = 0; pos = 0;
+  start_pos = 0;
   end_pos = search.find(";", start_pos);
   while (end_pos != string::npos && start_pos < search.size()) {
    local = search.substr(start_pos, end_pos - start_pos);
-   if (contents_of_file.find(local) != string::npos) {
-      while((pos = contents_of_file.find(local, pos)) != string::npos)
-      contents_of_file.replace(pos, local.length(), "");
-     }
-     start_pos = end_pos + 1;
-     end_pos = search.find(";", start_pos);
+      while(contents_of_file.find(local) != string::npos)
+      contents_of_file.replace(0, local.length(), "");     
+      start_pos = end_pos + 1;
+      end_pos = search.find(";", start_pos);
     }
       new_file << contents_of_file << '\n';
   }
@@ -1242,24 +1205,17 @@ void TWFunc::Replace_Word_In_File(std::string file_path, std::string search) {
 
 
 void TWFunc::Start_redwolf(void) {
-size_t i;
-std::string info = "/sbin/wlfs";
-
-     if (TWFunc::Path_Exists("/proc/touchpanel/capacitive_keys_enable"))
-	TWFunc::write_to_file("/proc/touchpanel/capacitive_keys_enable", "0");
-	else if (TWFunc::Path_Exists("/proc/touchpanel/capacitive_keys_disable"))
-	TWFunc::write_to_file("/proc/touchpanel/capacitive_keys_disable", "1");
-	
-if (TWFunc::Path_Exists(info)) {
+if (TWFunc::Path_Exists("/proc/touchpanel/capacitive_keys_enable"))
+TWFunc::write_to_file("/proc/touchpanel/capacitive_keys_enable", "0");
+else if (TWFunc::Path_Exists("/proc/touchpanel/capacitive_keys_disable"))
+TWFunc::write_to_file("/proc/touchpanel/capacitive_keys_disable", "1");
+if (TWFunc::Path_Exists("/sbin/wlfs")) {
 #ifndef TW_EXCLUDE_ENCRYPTED_BACKUPS
-if (TWFunc::Get_File_Type(info) == 2) {
-if (gui_startPage("lockpass", 1, 1) != 0) {
+if (TWFunc::Get_File_Type("/sbin/wlfs") == ENCRYPTED) {
+#endif
+if (gui_startPage("lockpass", 1, 1) != 0)
 LOGERR("Failed to start lockpass GUI page.\n");
-}
-}
-#else
-if (gui_startPage("lockpass", 1, 1) != 0) {
-LOGERR("Failed to start lockpass GUI page.\n");
+#ifndef TW_EXCLUDE_ENCRYPTED_BACKUPS
 }
 #endif
 }
@@ -1267,18 +1223,11 @@ LOGERR("Failed to start lockpass GUI page.\n");
  if (DataManager::GetIntValue(RW_T2W_CHECK) == 1) {
    if (TWFunc::Path_Exists("/sys/android_touch/doubletap2wake"))
      TWFunc::write_to_file("/sys/android_touch/doubletap2wake", "1");
-       }
-    
-	info = TWFunc::System_Property_Get("ro.build.display.id");
-	if (info.empty())
-		LOGINFO("ROM Status: Is not installed\n");
-	     else 
-	    LOGINFO("ROM Status: %s\n", info.c_str());
+     else if (TWFunc::Path_Exists("/proc/touchpanel/double_tap_enable"))
+     TWFunc::write_to_file("/proc/touchpanel/double_tap_enable", "1");
+       }    
    }
   
-
-     
-     
 
 void TWFunc::copy_kernel_log(string curr_storage) {
 	std::string dmesgDst = curr_storage + "/dmesg.log";
@@ -1289,17 +1238,7 @@ void TWFunc::copy_kernel_log(string curr_storage) {
 	write_to_file(dmesgDst, result);
 	gui_msg(Msg("copy_kernel_log=Copied kernel log to {1}")(dmesgDst));
 	tw_set_default_metadata(dmesgDst.c_str());
-}
-
-void TWFunc::create_fingerprint_file(string file_path, string fingerprint) {
-		if (TWFunc::Path_Exists(file_path))
-		unlink(file_path.c_str());
-	    ofstream file;
-        file.open (file_path.c_str());
-        file << fingerprint;
-        file.close();
-	    chmod(file_path.c_str(), 0640);
-}			                                
+}               
 
 
 bool TWFunc::isNumber(string strtocheck) {

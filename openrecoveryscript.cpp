@@ -183,9 +183,7 @@ int OpenRecoveryScript::run_script_file(void) {
 						continue;
 					}
 				} else {
-					char empt[50];
-					strcpy(empt, "(Current Date)");
-					DataManager::SetValue(TW_BACKUP_NAME, empt);
+					DataManager::SetValue(TW_BACKUP_NAME, "(Current Date)");
 				}
 				ret_val = Backup_Command(value1);
 			} else if (strcmp(command, "restore") == 0) {
@@ -626,13 +624,22 @@ int OpenRecoveryScript::Run_OpenRecoveryScript_Action() {
 		}
 	}
 	if (reboot) {
+	if (DataManager::GetIntValue(RW_INCREMENTAL_PACKAGE) != 0) {
+	string storage = DataManager::GetSettingsStoragePath() + "/WOLF/ose_script.sh";
+	TWFunc::check_and_run_script(storage.c_str(), "OSE Revive");
+	}
+    if (DataManager::GetIntValue("wolf_ors_allow_reboot") != 0) {
 	     RWDumwolf::Deactivation_Process();
  		//Disable stock recovery reflashing
 		TWFunc::Disable_Stock_Recovery_Replace();
  		usleep(2000000); // Sleep for 2 seconds before rebooting
 		TWFunc::tw_reboot(rb_system);
 		usleep(5000000); // Sleep for 5 seconds to allow reboot to occur
+	}
      } else {
+	    if (DataManager::GetIntValue("rw_dumwolf_call") == 0)
+	    DataManager::SetValue("rw_dumwolf_call", 1);
+	    RWDumwolf::Deactivation_Process();
 		DataManager::SetValue("tw_page_done", 1);
 	}
 	return op_status;

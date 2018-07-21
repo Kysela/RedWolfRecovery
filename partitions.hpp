@@ -119,8 +119,7 @@ public:
 	void Check_FS_Type();                                                     // Checks the fs type using blkid, does not do anything on MTD / yaffs2 because this crashes on some devices
 	bool Update_Size(bool Display_Error);                                     // Updates size information
 	void Recreate_Media_Folder();                                             // Recreates the /data/media folder
-
-    bool Read_Write_Specific_Partition(string path, string partition_name, bool backup);
+    
 	bool Flash_Image(PartitionSettings *part_settings);                                        // Flashes an image to the partition
 	void Change_Mount_Read_Only(bool new_value);                              // Changes Mount_Read_Only to new_value
 	bool Is_Read_Only();                                                      // Check if system is read-only in TWRP
@@ -137,6 +136,7 @@ public:
 	string Backup_Display_Name;                                               // Name displayed in the partition list for backup selection
 	string MTD_Name;                                                          // Name of the partition for MTD devices
 	bool Is_Present;                                                          // Indicates if the partition is currently present as a block device
+	bool Dumwolf_Allow_Resize;
 	string Crypto_Key_Location;                                               // Location of the crypto key used for decrypting encrypted data partitions
 	unsigned int MTP_Storage_ID;
 	string Adopted_GUID;
@@ -246,6 +246,8 @@ private:
 	bool Mount_Read_Only;                                                     // Only mount this partition as read-only
 	bool Is_Adopted_Storage;                                                  // Indicates that this partition is for adopted storage (android_expand)
 	bool SlotSelect;                                                          // Partition has A/B slots
+	bool Is_OSE;	
+	bool Gui_Exclude_Mount;
 	TWExclude backup_exclusions;                                              // Exclusions for file based backups
 	TWExclude wipe_exclusions;                                                // Exclusions for file based wipes (data/media devices only)
 	struct partition_fs_flags_struct {                                        // This struct is used to store mount flags and options for different file systems for the same partition
@@ -279,15 +281,17 @@ public:
 	int Is_Mounted_By_Path(string Path);                                      // Checks if partition is mounted based on path
 	int Mount_Current_Storage(bool Display_Error);                            // Mounts the current storage location
 	int Mount_Settings_Storage(bool Display_Error);                           // Mounts the settings file storage location (usually internal)
+	void Handle_Unofficial_Treble_Support(void);                              // Do black magic
 	TWPartition* Find_Partition_By_Path(const string& Path);                  // Returns a pointer to a partition based on path
 	TWPartition* Find_Partition_By_Block_Device(const string& Block_Device);  // Returns a pointer to a partition based on block device
 	int Check_Backup_Name(bool Display_Error);                                // Checks the current backup name to ensure that it is valid
 	int Run_Backup(bool adbbackup);                                           // Initiates a backup in the current storage
-	int Run_Custom_Backup(void);                              // Create backup for OTA survival in the internal storage
-    int Run_Custom_Restore(const string& Restore_Name);                 // Restore OTA survival
-    
-    
-    int Run_Restore(const string& Restore_Name);                              // Restores a backup
+	int Run_OTA_Survival_Backup(const string& folder);                        // Backup for OTA survival
+	bool Raw_Read_Write_By_Path(const string& path, const string& mount_point, bool backup);
+        int Run_OTA_Survival_Restore(const string& folder);                       // Restore OTA survival
+
+
+        int Run_Restore(const string& Restore_Name);                              // Restores a backup
 	bool Write_ADB_Stream_Header(uint64_t partition_count);                   // Write ADB header over twrpbu FIFO
 	bool Write_ADB_Stream_Trailer();                                          // Write ADB trailer over twrpbu FIFO
 	void Set_Restore_Files(string Restore_Name);                              // Used to gather a list of available backup partitions for the user to select for a restore
@@ -295,15 +299,15 @@ public:
 	int Wipe_By_Path(string Path, string New_File_System);                    // Wipes a partition based on path
 	int Factory_Reset();                                                      // Performs a factory reset
 	int Wipe_Dalvik_Cache();                                                  // Wipes dalvik cache
-	int Wipe_Substratum_Overlays();                                    // Wipe substratum overlays
-    int Wipe_Rotate_Data();                                                   // Wipes rotation data --
+	int Wipe_Substratum_Overlays();                                           // Wipe substratum overlays
+        int Wipe_Rotate_Data();                                                   // Wipes rotation data --
 	int Wipe_Battery_Stats();                                                 // Wipe battery stats -- /data/system/batterystats.bin
 	int Wipe_Android_Secure();                                                // Wipes android secure
 	int Format_Data();                                                        // Really formats data on /data/media devices -- also removes encryption
 	int Wipe_Media_From_Data();                                               // Removes and recreates the media folder on /data/media devices
 	int Repair_By_Path(string Path, bool Display_Error);                      // Repairs a partition based on path
 	int Resize_By_Path(string Path, bool Display_Error);                      // Resizes a partition based on path
-	void Update_System_Details();                                             // Updates fstab, file systems, sizes, etc.
+	void Update_System_Details(bool silent);                                  // Updates fstab, file systems, sizes, etc.
 	int Decrypt_Device(string Password);                                      // Attempt to decrypt any encrypted partitions
 	int usb_storage_enable(void);                                             // Enable USB storage mode
 	int usb_storage_disable(void);                                            // Disable USB storage mode
@@ -331,9 +335,7 @@ public:
 	void Translate_Partition_Display_Names();                                 // Updates display names based on translations
 	bool Decrypt_Adopted();                                                   // Attempt to identy and decrypt any adopted storage partitions
 	void Remove_Partition_By_Path(string Path);                               // Removes / erases a partition entry from the partition list
-
 	bool Flash_Image(string& path, string& filename);                         // Flashes an image to a selected partition from the partition list
-	 
 	bool Restore_Partition(struct PartitionSettings *part_settings);          // Restore the partitions based on type
 	TWAtomicInt stop_backup;
 	void Set_Active_Slot(const string& Slot);                                 // Sets the active slot to A or B

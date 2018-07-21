@@ -157,6 +157,9 @@ enum TW_FSTAB_FLAGS {
 	TWFLAG_VOLDMANAGED,
 	TWFLAG_FORMATTABLE,
 	TWFLAG_RESIZE,
+	TWFLAG_OSE_PARTITION,
+	TWFLAG_GUI_MOUNTEXCLUDE,
+	TWFLAG_DUMWOLF_RESIZE,
 };
 
 /* Flags without a trailing '=' are considered dual format flags and can be
@@ -199,6 +202,9 @@ const struct flag_list tw_flags[] = {
 	{ "voldmanaged=",           TWFLAG_VOLDMANAGED },
 	{ "formattable",            TWFLAG_FORMATTABLE },
 	{ "resize",                 TWFLAG_RESIZE },
+	{ "ose",                    TWFLAG_OSE_PARTITION },
+	{ "treble",                 TWFLAG_GUI_MOUNTEXCLUDE },
+	{ "dumwolfresize",                 TWFLAG_DUMWOLF_RESIZE },
 	{ 0,                        0 },
 };
 
@@ -262,6 +268,9 @@ TWPartition::TWPartition() {
 	Is_Adopted_Storage = false;
 	Adopted_GUID = "";
 	SlotSelect = false;
+	Is_OSE = false;
+	Gui_Exclude_Mount = false;
+	Dumwolf_Allow_Resize = false;
 }
 
 TWPartition::~TWPartition(void) {
@@ -888,6 +897,15 @@ void TWPartition::Apply_TW_Flag(const unsigned flag, const char* str, const bool
 		case TWFLAG_ALTDEVICE:
 			Alternate_Block_Device = str;
 			break;
+		case TWFLAG_OSE_PARTITION:
+		   Is_OSE = true;
+	       break;
+	    case TWFLAG_GUI_MOUNTEXCLUDE:
+	      Gui_Exclude_Mount = true;
+	      break;
+       case TWFLAG_DUMWOLF_RESIZE:
+	      Dumwolf_Allow_Resize = true;
+	      break;
 		default:
 			// Should not get here
 			LOGINFO("Flag identified for processing, but later unmatched: %i\n", flag);
@@ -1830,10 +1848,8 @@ bool TWPartition::Backup(PartitionSettings *part_settings, pid_t *tar_fork_pid) 
 }
 
 bool TWPartition::Restore(PartitionSettings *part_settings) {
-	if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1) {
 	TWFunc::GUI_Operation_Text(TW_RESTORE_TEXT, Display_Name, gui_parse_text("{@restoring_hdr}"));
 	LOGINFO("Restore filename is: %s/%s\n", part_settings->Backup_Folder.c_str(), Backup_FileName.c_str());
-    }
 	string Restore_File_System = Get_Restore_File_System(part_settings);
 
 	if (Is_File_System(Restore_File_System))
@@ -2059,8 +2075,7 @@ bool TWPartition::Wipe_EXT4() {
 	int ret;
 	char *secontext = NULL;
 
-    if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1)
-	gui_msg(Msg("formatting_using=Formatting {1} using {2}...")(Display_Name)("make_ext4fs"));
+    gui_msg(Msg("formatting_using=Formatting {1} using {2}...")(Display_Name)("make_ext4fs"));
 
 	if (!selinux_handle || selabel_lookup(selinux_handle, &secontext, Mount_Point.c_str(), S_IFDIR) < 0) {
 		LOGINFO("Cannot lookup security context for '%s'\n", Mount_Point.c_str());
@@ -2082,8 +2097,7 @@ bool TWPartition::Wipe_EXT4() {
 	if (TWFunc::Path_Exists("/sbin/make_ext4fs")) {
 		string Command;
 
-        if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1)
-		gui_msg(Msg("formatting_using=Formatting {1} using {2}...")(Display_Name)("make_ext4fs"));
+        gui_msg(Msg("formatting_using=Formatting {1} using {2}...")(Display_Name)("make_ext4fs"));
 		Find_Actual_Block_Device();
 		Command = "make_ext4fs";
 		if (!Is_Decrypted && Length != 0) {
@@ -2337,10 +2351,8 @@ bool TWPartition::Backup_Tar(PartitionSettings *part_settings, pid_t *tar_fork_p
 	if (!Mount(true))
 		return false;
 
-	if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1) {
 	TWFunc::GUI_Operation_Text(TW_BACKUP_TEXT, Backup_Display_Name, "Backing Up");
 	gui_msg(Msg("backing_up=Backing up {1}...")(Backup_Display_Name));
-	}
 	
 	DataManager::GetValue(TW_USE_COMPRESSION_VAR, tar.use_compression);
 
@@ -2379,11 +2391,8 @@ bool TWPartition::Backup_Tar(PartitionSettings *part_settings, pid_t *tar_fork_p
 
 bool TWPartition::Backup_Image(PartitionSettings *part_settings) {
 	string Full_FileName, adb_file_name;
-
-	if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1) {
 	TWFunc::GUI_Operation_Text(TW_BACKUP_TEXT, Display_Name, gui_parse_text("{@backing}"));
 	gui_msg(Msg("backing_up=Backing up {1}...")(Backup_Display_Name));
-    }
 
 	Backup_FileName = Backup_Name + "." + Current_File_System + ".win";
 
@@ -2490,20 +2499,18 @@ bool TWPartition::Raw_Read_Write(PartitionSettings *part_settings) {
 	}
 	if (part_settings->progress)
 		part_settings->progress->UpdateDisplayDetails(true);
-	fsync(dest_fd);
+	    fsync(dest_fd);
 
 	if (!part_settings->adbbackup && part_settings->PM_Method == PM_BACKUP) {
-		if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1) {
-		if (part_settings->Part->Backup_Name == "recovery" || part_settings->Part->Backup_Name == "boot") {
+		if (part_settings->Part->Dumwolf_Allow_Resize) {
 		if (!RWDumwolf::Resize_By_Path(destfn))
 		LOGINFO("Unable to resize image by path: %s\n", destfn.c_str());
 		else
-		LOGINFO("Successfully resized image by path: %s\n", destfn.c_str());
-		}
-		}
+		LOGINFO("Successfully resized image by path: %s\n", destfn.c_str());		
+		}		
 		tw_set_default_metadata(destfn.c_str());
-		LOGINFO("Restored default metadata for %s\n", destfn.c_str());
-	}
+		LOGINFO("Restored default metadata for %s\n", destfn.c_str());	
+		}
 	ret = true;
 exit:
 	if (src_fd >= 0)
@@ -2517,11 +2524,8 @@ exit:
 
 bool TWPartition::Backup_Dump_Image(PartitionSettings *part_settings) {
 	string Full_FileName, Command;
-
-	if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1) {
-	TWFunc::GUI_Operation_Text(TW_BACKUP_TEXT, Display_Name, gui_parse_text("{@backing}"));
+    TWFunc::GUI_Operation_Text(TW_BACKUP_TEXT, Display_Name, gui_parse_text("{@backing}"));
 	gui_msg(Msg("backing_up=Backing up {1}...")(Backup_Display_Name));
-    }
 	
 	if (part_settings->progress)
 		part_settings->progress->SetPartitionSize(Backup_Size);
@@ -2590,9 +2594,7 @@ bool TWPartition::Restore_Tar(PartitionSettings *part_settings) {
 		if (!Wipe_AndSec())
 			return false;
 	} else {
-		if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1) {
 		gui_msg(Msg("wiping=Wiping {1}")(Backup_Display_Name));
-		}
 		if (Has_Data_Media && Mount_Point == "/data" && Restore_File_System != Current_File_System) {
 			gui_msg(Msg(msg::kWarning, "datamedia_fs_restore=WARNING: This /data backup was made with {1} file system! The backup may not boot unless you change back to {1}.")(Restore_File_System));
 			if (!Wipe_Data_Without_Wiping_Media())
@@ -2602,10 +2604,8 @@ bool TWPartition::Restore_Tar(PartitionSettings *part_settings) {
 				return false;
 		}
 	}
-	if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1) {
 	TWFunc::GUI_Operation_Text(TW_RESTORE_TEXT, Backup_Display_Name, gui_parse_text("{@restoring_hdr}"));
 	gui_msg(Msg("restoring=Restoring {1}...")(Backup_Display_Name));
-     }
 
 	// Remount as read/write as needed so we can restore the backup
 	if (!ReMount_RW(true))
@@ -2658,10 +2658,8 @@ bool TWPartition::Restore_Image(PartitionSettings *part_settings) {
 	string Full_FileName;
 	string Restore_File_System = Get_Restore_File_System(part_settings);
 
-	if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1) {
 	TWFunc::GUI_Operation_Text(TW_RESTORE_TEXT, Backup_Display_Name, gui_parse_text("{@restoring_hdr}"));
 	gui_msg(Msg("restoring=Restoring {1}...")(Backup_Display_Name));
-    }
 	
 	if (part_settings->adbbackup)
 		Full_FileName = TW_ADB_RESTORE;
@@ -3197,4 +3195,4 @@ void TWPartition::Set_Backup_FileName(string fname) {
 string TWPartition::Get_Backup_Name() {
 	return Backup_Name;
 }
-		
+	

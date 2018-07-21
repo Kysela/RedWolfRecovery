@@ -338,13 +338,7 @@ bool Page::ProcessNode(xml_node<>* page, std::vector<xml_node<>*> *templates, in
 			mBackground = LoadAttrColor(child, "color", COLOR(0,0,0,0));
 			continue;
 		}
-
-		if (type == "object") {
-			// legacy format : <object type="...">
-			xml_attribute<>* attr = child->first_attribute("type");
-			type = attr ? attr->value() : "*unspecified*";
-		}
-
+		
 		if (type == "text")
 		{
 			GUIText* element = new GUIText(child);
@@ -1349,9 +1343,7 @@ int PageManager::LoadPackage(std::string name, std::string package, std::string 
 	LoadingContext ctx;
 
 	// Open the XML file
-	LOGINFO("Loading package: %s (%s)\n", name.c_str(), package.c_str());
-	if (package.size() > 4 && package.substr(package.size() - 4) != ".zip")
-	{
+	    LOGINFO("Loading package: %s (%s)\n", name.c_str(), package.c_str());
 		LOGINFO("Load XML directly\n");
 		tw_x_offset = TW_X_OFFSET;
 		tw_y_offset = TW_Y_OFFSET;
@@ -1361,39 +1353,8 @@ int PageManager::LoadPackage(std::string name, std::string package, std::string 
 			LoadLanguageList(NULL);
 			languageFile = LoadFileToBuffer(TWRES "languages/en.xml", NULL);
 		}
-		ctx.basepath = TWRES;
-	}
-	else
-	{
-		LOGINFO("Loading zip theme\n");
-		tw_x_offset = 0;
-		tw_y_offset = 0;
-		tw_w_offset = 0;
-		tw_h_offset = 0;
-		if (!TWFunc::Path_Exists(package))
-			return -1;
-#ifdef USE_MINZIP
-		if (sysMapFile(package.c_str(), &map) != 0) {
-#else
-		if (!map.MapFile(package)) {
-#endif
-			LOGERR("Failed to map '%s'\n", package.c_str());
-			goto error;
-		}
-		if (!zip.Open(package.c_str(), &map)) {
-			LOGERR("Unable to open zip archive '%s'\n", package.c_str());
-#ifdef USE_MINZIP
-			sysReleaseMap(&map);
-#endif
-			goto error;
-		}
-		ctx.zip = &zip;
-		mainxmlfilename = "ui.xml";
-		LoadLanguageList(ctx.zip);
-		languageFile = LoadFileToBuffer("languages/en.xml", ctx.zip);
-		baseLanguageFile = LoadFileToBuffer(TWRES "languages/en.xml", NULL);
-	}
-
+		ctx.basepath = TWRES;	
+	
 	// Before loading, mCurrentSet must be the loading package so we can find resources
 	pageSet = mCurrentSet;
 	mCurrentSet = new PageSet();
@@ -1525,24 +1486,13 @@ int PageManager::RunReload() {
 	if (!mReloadTheme)
 		return 0;
 
-	mReloadTheme = false;
-	theme_path = DataManager::GetSettingsStoragePath();
-	if (PartitionManager.Mount_By_Path(theme_path.c_str(), 1) < 0) {
-		LOGERR("Unable to mount %s during gui_reload_theme function.\n", theme_path.c_str());
-		ret_val = 1;
-	}
-
-	theme_path += "/WOLF/.bin./jq.zip";
-	if (ret_val != 0 || ReloadPackage("TWRP", theme_path) != 0)
-	{
-		// Loading the custom theme failed - try loading the stock theme
-		LOGINFO("Attempting to reload stock theme...\n");
+	   mReloadTheme = false;
 		if (ReloadPackage("TWRP", TWRES "ui.xml"))
 		{
 			LOGERR("Failed to load base packages.\n");
 			ret_val = 1;
 		}
-	}
+		
 	if (ret_val == 0) {
 		if (DataManager::GetStrValue("tw_language") != "en.xml") {
 			LOGINFO("Loading language '%s'\n", DataManager::GetStrValue("tw_language").c_str());
@@ -1567,8 +1517,7 @@ void PageManager::SetStartPage(const std::string& page_name) {
 int PageManager::ChangePage(std::string name)
 {
 	DataManager::SetValue("tw_operation_state", 0);
-	int ret = (mCurrentSet ? mCurrentSet->SetPage(name) : -1);
-	return ret;
+	return mCurrentSet ? mCurrentSet->SetPage(name) : -1;
 }
 
 std::string PageManager::GetCurrentPage()

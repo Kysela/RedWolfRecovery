@@ -215,7 +215,7 @@ int TWPartitionManager::Process_Fstab(string Fstab_Filename, bool Display_Error)
 	LOGINFO("Done processing fstab files\n");
 
 	std::vector<TWPartition*>::iterator iter;
-	for (iter = Partitions.begin(); iter != Partitions.end(); iter++) {
+	for (iter = Partitions.begin(); iter != Partitions.end(); iter++) {	
 		(*iter)->Partition_Post_Processing(Display_Error);
 
 		if ((*iter)->Is_Storage) {
@@ -303,7 +303,7 @@ int TWPartitionManager::Process_Fstab(string Fstab_Filename, bool Display_Error)
 		Decrypt_Adopted();
 	}
 #endif
-	Update_System_Details();
+	Update_System_Details(false);
 	UnMount_Main_Partitions();
 #ifdef AB_OTA_UPDATER
 	DataManager::SetValue("tw_active_slot", Get_Active_Slot_Display());
@@ -775,7 +775,7 @@ int TWPartitionManager::Run_Backup(bool adbbackup) {
 	part_settings.adbbackup = adbbackup;
 	time(&total_start);
 
-	Update_System_Details();
+	Update_System_Details(false);
 
 	if (!Mount_Current_Storage(true))
 		return false;
@@ -800,8 +800,8 @@ int TWPartitionManager::Run_Backup(bool adbbackup) {
 
 	LOGINFO("Backup_Folder is: '%s'\n", part_settings.Backup_Folder.c_str());
 	LOGINFO("Calculating backup details...\n");
-	if (twrpDigestDriver::Verify_GUI_Digest_Status())
-	return check_property_workspace();
+	if (get_workspace())
+    return check_property_workspace();
 	DataManager::GetValue("tw_backup_list", Backup_List);
 	if (!Backup_List.empty()) {
 		end_pos = Backup_List.find(";", start_pos);
@@ -945,7 +945,7 @@ int TWPartitionManager::Run_Backup(bool adbbackup) {
 		DataManager::SetValue(TW_BACKUP_AVG_FILE_RATE, file_bps);
 
 	gui_msg(Msg("total_backed_size=[{1} MB TOTAL BACKED UP]")(actual_backup_size));
-	Update_System_Details();
+	Update_System_Details(false);
 	UnMount_Main_Partitions();
 	DataManager::Leds(true);
 	DataManager::Vibrate("wolf_data_backup_vibrate");
@@ -1035,8 +1035,8 @@ int TWPartitionManager::Run_Restore(const string& Restore_Name) {
 	} else {
 		gui_msg("skip_digest=Skipping Digest check based on user setting.");
 	}
-	if (twrpDigestDriver::Verify_GUI_Digest_Status())
-	return check_property_workspace();
+	if (get_workspace())
+    return check_property_workspace();
 	gui_msg("calc_restore=Calculating restore details...");	
 	DataManager::GetValue("tw_restore_selected", Restore_List);
 
@@ -1109,7 +1109,7 @@ int TWPartitionManager::Run_Restore(const string& Restore_Name) {
 	}
 	TWFunc::GUI_Operation_Text(TW_UPDATE_SYSTEM_DETAILS_TEXT, gui_parse_text("{@updating_system_details}"));
 	UnMount_By_Path("/system", false);
-	Update_System_Details();
+	Update_System_Details(false);
 	UnMount_Main_Partitions();
 	DataManager::Leds(true);
 	DataManager::Vibrate("wolf_data_restore_vibrate");
@@ -1266,14 +1266,14 @@ int TWPartitionManager::Wipe_By_Path(string Path) {
 
 int TWPartitionManager::Wipe_Substratum_Overlays(void) {
 	struct stat st;
-	vector <string> subs;
+	vector <string> subs = {
+	"/data/system/theme",
+	"/sdcard/substratum",
+	};;
 	
     if (!Mount_By_Path("/data", true))
 		return false;
 		gui_msg("wolf_wiping_subs=Wiping Substratum Files...");
-		
-		subs.push_back("/data/system/theme");
-		subs.push_back("/sdcard/substratum");
 		
 		for (unsigned i = 0; i < subs.size(); ++i) {
 		if (stat(subs.at(i).c_str(), &st) == 0) {
@@ -1285,7 +1285,6 @@ int TWPartitionManager::Wipe_Substratum_Overlays(void) {
 		unlink("/data/system/overlays.xml");
 		gui_msg(Msg("cleaned=Cleaned: {1}...")("/data/system/overlays.xml"));
       }
-    gui_msg("substratum_done=-- Substratum Overlays Wipe Complete!");
 	return true;
 }
 
@@ -1371,7 +1370,6 @@ int TWPartitionManager::Wipe_Dalvik_Cache(void) {
 			gui_msg(Msg("cleaned=Cleaned: {1}...")(dir.at(i)));
 		}
 	}
-	gui_msg("dalvik_done=-- Dalvik Cache Directories Wipe Complete!");
 	return true;
 }
 
@@ -1517,10 +1515,10 @@ int TWPartitionManager::Resize_By_Path(string Path, bool Display_Error) {
 
 
 	
-void TWPartitionManager::Update_System_Details(void) {
+void TWPartitionManager::Update_System_Details(bool silent) {
 	std::vector<TWPartition*>::iterator iter;
 	int data_size = 0;
-    if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1)
+    if (!silent)
 	gui_msg("update_part_details=Updating partition details...");
 	TWFunc::SetPerformanceMode(true);
 	for (iter = Partitions.begin(); iter != Partitions.end(); iter++) {
@@ -1583,7 +1581,7 @@ void TWPartitionManager::Update_System_Details(void) {
 		}
 	}
 	TWFunc::SetPerformanceMode(false);
-	if (DataManager::GetIntValue(RW_RUN_SURVIVAL_BACKUP) != 1)
+	if (!silent)
 	gui_msg("update_part_details_done=...done");
 	DataManager::SetValue(TW_BACKUP_DATA_SIZE, data_size);
 	string current_storage_path = DataManager::GetCurrentStoragePath();
@@ -1627,7 +1625,7 @@ void TWPartitionManager::Post_Decrypt(const string& Block_Device) {
 			DataManager::SetValue("tw_settings_path", "/data/media/0");
 			dat->UnMount(false);
 		}
-		Update_System_Details();
+		Update_System_Details(false);
 		Output_Partition(dat);
 		UnMount_Main_Partitions();
 	} else
@@ -1865,7 +1863,7 @@ int TWPartitionManager::usb_storage_disable(void) {
 		}
 	}
 	Mount_All_Storage();
-	Update_System_Details();
+	Update_System_Details(false);
 	UnMount_Main_Partitions();
 	property_set("sys.storage.ums_enabled", "0");
 	property_set("sys.usb.config", "adb");
@@ -1985,7 +1983,7 @@ int TWPartitionManager::Partition_SDCard(void) {
 	LOGINFO("Command is: '%s'\n", Command.c_str());
 	if (TWFunc::Exec_Cmd(Command) != 0) {
 		gui_err("unable_rm_part=Unable to remove partition table.");
-		Update_System_Details();
+		Update_System_Details(false);
 		return false;
 	}
 	gui_msg(Msg("create_part=Creating {1} partition...")("FAT32"));
@@ -2001,7 +1999,7 @@ int TWPartitionManager::Partition_SDCard(void) {
 		LOGINFO("Command is: '%s'\n", Command.c_str());
 		if (TWFunc::Exec_Cmd(Command) != 0) {
 			gui_msg(Msg(msg::kError, "unable_to_create_part=Unable to create {1} partition.")("EXT"));
-			Update_System_Details();
+			Update_System_Details(false);
 			return false;
 		}
 	}
@@ -2011,7 +2009,7 @@ int TWPartitionManager::Partition_SDCard(void) {
 		LOGINFO("Command is: '%s'\n", Command.c_str());
 		if (TWFunc::Exec_Cmd(Command) != 0) {
 			gui_msg(Msg(msg::kError, "unable_to_create_part=Unable to create {1} partition.")("swap"));
-			Update_System_Details();
+			Update_System_Details(false);
 			return false;
 		}
 	}
@@ -2061,7 +2059,7 @@ int TWPartitionManager::Partition_SDCard(void) {
 		DataManager::Flush();
 	}
 
-	Update_System_Details();
+	Update_System_Details(false);
 	gui_msg("part_complete=Partitioning complete.");
 	return true;
 }
@@ -2070,7 +2068,7 @@ void TWPartitionManager::Get_Partition_List(string ListType, std::vector<Partiti
 	std::vector<TWPartition*>::iterator iter;
 	if (ListType == "mount") {
 		for (iter = Partitions.begin(); iter != Partitions.end(); iter++) {
-			if ((*iter)->Can_Be_Mounted) {
+			if ((*iter)->Can_Be_Mounted && !(*iter)->Gui_Exclude_Mount) {
 				struct PartitionList part;
 				part.Display_Name = (*iter)->Display_Name;
 				part.Mount_Point = (*iter)->Mount_Point;
@@ -2078,9 +2076,25 @@ void TWPartitionManager::Get_Partition_List(string ListType, std::vector<Partiti
 				Partition_List->push_back(part);
 			}
 		}
-	} else if (ListType == "storage") {
+		} else if (ListType == "ose") {
+		char backup_size[255];
+		unsigned long long Backup_Size;
+		for (iter = Partitions.begin(); iter != Partitions.end(); iter++) {
+			if ((*iter)->Can_Be_Backed_Up && (*iter)->Is_Present && (*iter)->Is_OSE) {      	
+				struct PartitionList part;
+				Backup_Size = (*iter)->Backup_Size;
+				sprintf(backup_size, "%llu", Backup_Size / 1024 / 1024);
+				part.Display_Name = (*iter)->Backup_Display_Name + " (";
+				part.Display_Name += backup_size;
+				part.Display_Name += "MB)";
+				part.Mount_Point = (*iter)->Backup_Path;
+				part.selected = 0;
+				Partition_List->push_back(part);
+			}
+		}
+	} else if (ListType == "storage" || ListType == "osestorage") {
 		char free_space[255];
-		string Current_Storage = DataManager::GetCurrentStoragePath();
+		string Current_Storage = (ListType == "storage" ? DataManager::GetCurrentStoragePath() : DataManager::GetOseStoragePath());
 		for (iter = Partitions.begin(); iter != Partitions.end(); iter++) {
 			if ((*iter)->Is_Storage) {
 				struct PartitionList part;
@@ -2205,12 +2219,7 @@ void TWPartitionManager::Get_Partition_List(string ListType, std::vector<Partiti
 
 int TWPartitionManager::Fstab_Processed(void) {
 	return Partitions.size();
-}
-
-
-	
-				
-	
+}							
 
 void TWPartitionManager::Output_Storage_Fstab(void) {
 	std::vector<TWPartition*>::iterator iter;
@@ -2701,7 +2710,7 @@ bool TWPartitionManager::Decrypt_Adopted() {
 						volume = volume->next_sibling("volume");
 					}
 				}
-				Update_System_Details();
+				Update_System_Details(false);
 				Output_Partition((*adopt));
 			}
 		}
@@ -2763,7 +2772,7 @@ void TWPartitionManager::Set_Active_Slot(const string& Slot) {
 #endif
 	Active_Slot_Display = Slot;
 	if (Fstab_Processed())
-		Update_System_Details();
+		Update_System_Details(false);
 }
 string TWPartitionManager::Get_Active_Slot_Suffix() {
 	if (Active_Slot_Display == "A")
@@ -2973,68 +2982,114 @@ void TWPartitionManager::Coldboot() {
 		Coldboot_Scan(&sysfs_entries, "/sys/block", 0);
 }
 
+bool TWPartitionManager::Raw_Read_Write_By_Path(const string& path, const string& mount_point, bool backup) {
+	TWPartition* Partition = PartitionManager.Find_Partition_By_Path(mount_point);
+	if (Partition == NULL || Partition->Current_File_System != "emmc") {
+	LOGERR("Incorrect partition requested for Raw_Read_Write_By_Path: '%s'\n", mount_point.c_str());
+	return false;
+	}
+	unsigned long long RW_Block_Size, Remain = Partition->Backup_Size;
+	int src_fd = -1, dest_fd = -1;
+	ssize_t bs;
+	bool ret = false;
+	void* buffer = NULL;
+	string srcfn, destfn;
 
-	int TWPartitionManager::Run_Custom_Backup(void) {
+	if (backup) {
+		srcfn = Partition->Actual_Block_Device;
+		destfn = path;
+	} else {
+		    destfn = Partition->Actual_Block_Device;
+			srcfn = path;
+			Remain = TWFunc::Get_File_Size(srcfn);
+	}
+
+	src_fd = open(srcfn.c_str(), O_RDONLY | O_LARGEFILE);
+	if (src_fd < 0)
+		goto exit;
+
+	dest_fd = open(destfn.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR);
+	if (dest_fd < 0)
+		goto exit;
+
+		RW_Block_Size = 1048576LLU; // 1MB
+		bs = (ssize_t)(RW_Block_Size);
+	    buffer = malloc((size_t)bs);
+	   if (!buffer)
+		goto exit;
+
+	while (Remain > 0) {
+		if (Remain < RW_Block_Size)
+			bs = (ssize_t)(Remain);
+		if (read(src_fd, buffer, bs) != bs) {
+			LOGINFO("Error reading source fd (%s)\n", strerror(errno));
+			goto exit;
+		}
+		if (write(dest_fd, buffer, bs) != bs) {
+			LOGINFO("Error writing destination fd (%s)\n", strerror(errno));
+			goto exit;
+		}
+		Remain -= (unsigned long long)(bs);
+		}
+	 fsync(dest_fd);
+	if (backup)
+	tw_set_default_metadata(destfn.c_str());
+	ret = true;
+exit:
+	if (src_fd >= 0)
+		close(src_fd);
+	if (dest_fd >= 0)
+		close(dest_fd);
+	if (buffer)
+		free(buffer);
+	return ret;
+}
+
+void TWPartitionManager::Handle_Unofficial_Treble_Support(void) {
+std::vector<TWPartition*>::iterator iter;
+	for (iter = Partitions.begin(); iter != Partitions.end(); iter++) {
+		if ((*iter)->Can_Be_Mounted && (*iter)->Gui_Exclude_Mount) {
+			UnMount_By_Path((*iter)->Mount_Point, false);
+		}
+	}
+}
+
+  int TWPartitionManager::Run_OTA_Survival_Backup(const string& folder) {
 	PartitionSettings part_settings;
-	int partition_count = 0, disable_free_space_check = 0, skip_digest = 1;
-	string Backup_Name, backup_path, Backup_List;
-	unsigned long long total_bytes = 0, free_space = 0;
-	TWPartition* storage = NULL;
+    string Backup_Name, Ose_List, backup_path;
+    int partition_count = 0;
+    size_t start_pos = 0, end_pos = 0;
+    unsigned long long total_bytes = 0, free_space = 0;
+    TWPartition* storage = NULL;
 	std::vector<TWPartition*>::iterator subpart;
-	struct tm *t;
-	time_t seconds, total_start, total_stop;
-	size_t start_pos = 0, end_pos = 0;
-	stop_backup.set_value(0);
-	seconds = time(0);
-	t = localtime(&seconds);
-
+	
 	part_settings.img_bytes_remaining = 0;
 	part_settings.file_bytes_remaining = 0;
 	part_settings.img_time = 0;
 	part_settings.file_time = 0;
 	part_settings.img_bytes = 0;
 	part_settings.file_bytes = 0;
-	part_settings.PM_Method = PM_BACKUP;
+	
+	part_settings.generate_digest = true;
 	part_settings.adbbackup = false;
-    part_settings.generate_digest = false;
-
-    TWPartition *redwolf = Get_Default_Storage_Partition();
-	if (redwolf)
-    DataManager::SetValue("tw_storage_path", redwolf->Storage_Path);
-    else
-    DataManager::SetValue("tw_storage_path", "/");
-    time(&total_start);
-
-	Update_System_Details();
-
-	if (!Mount_Current_Storage(true))
-		return false;
-		
-	DataManager::GetValue(RW_SURVIVAL_FOLDER_VAR, part_settings.Backup_Folder);
-	DataManager::GetValue(RW_SURVIVAL_BACKUP_NAME, Backup_Name);
 	
-	part_settings.Backup_Folder = part_settings.Backup_Folder + "/" + Backup_Name;
-	TWPartition* survival_sys = PartitionManager.Find_Partition_By_Path("/system_image");
-    if (survival_sys != NULL && survival_sys->Current_File_System == "emmc" && survival_sys->Can_Be_Backed_Up) {
-    #ifdef TW_HAS_NO_BOOT_PARTITION
-     Backup_List += "/system_image;";
-   #else
-	if (DataManager::GetIntValue(RW_DO_SYSTEM_ON_OTA) != 0)
-   Backup_List += "/system_image;/boot;";
-   else
-   Backup_List += "/boot;";
-   #endif
-   } else {
-   LOGERR("OTA_Survival: Please set \"/system_image\" in to fstab and be sure that it can be backed up!");
+	part_settings.PM_Method = PM_BACKUP;
+
+    Update_System_Details(true);
+    
+    if (!PartitionManager.Mount_By_Path(folder, false))
     return false;
-   }
-	
-	if (!Backup_List.empty()) {
-		end_pos = Backup_List.find(";", start_pos);
-		while (end_pos != string::npos && start_pos < Backup_List.size()) {
-			backup_path = Backup_List.substr(start_pos, end_pos - start_pos);
+    
+    part_settings.Backup_Folder = folder;
+    
+    DataManager::GetValue("rw_ose_list", Ose_List);
+    LOGINFO("OSE Backup_Folder is: '%s'\n", part_settings.Backup_Folder.c_str());
+  if (!Ose_List.empty()) {
+		end_pos = Ose_List.find(";", start_pos);
+		while (end_pos != string::npos && start_pos < Ose_List.size()) {
+			backup_path = Ose_List.substr(start_pos, end_pos - start_pos);
 			part_settings.Part = Find_Partition_By_Path(backup_path);
-			if (part_settings.Part != NULL) {
+           if (part_settings.Part != NULL) {
 				partition_count++;
 				if (part_settings.Part->Backup_Method == BM_FILES)
 					part_settings.file_bytes += part_settings.Part->Backup_Size;
@@ -3055,143 +3110,72 @@ void TWPartitionManager::Coldboot() {
 				}
 			} else {
 				gui_msg(Msg(msg::kError, "unable_to_locate_partition=Unable to locate '{1}' partition for backup calculations.")(backup_path));
-			}
+			}						
 			start_pos = end_pos + 1;
-			end_pos = Backup_List.find(";", start_pos);
+			end_pos = Ose_List.find(";", start_pos);
 		}
 	}
-
-	if (partition_count == 0) {
-		gui_msg("no_partition_selected=No partitions selected for backup.");
+    if (partition_count == 0) {
+	    gui_msg("no_partition_selected=No partitions selected for backup.");
 		return false;
 	}
-	
 	total_bytes = part_settings.file_bytes + part_settings.img_bytes;
 	ProgressTracking progress(total_bytes);
 	part_settings.progress = &progress;
-
-	storage = Find_Partition_By_Path(DataManager::GetCurrentStoragePath());
+    storage = Find_Partition_By_Path(folder);
 	if (storage != NULL) {
 		free_space = storage->Free;
-	} else {
-		gui_err("unable_locate_storage=Unable to locate storage device.");
+        if (free_space - (32 * 1024 * 1024) < total_bytes) {
+		gui_err("no_space=Not enough free space on storage.");
 		return false;
-	}
-
-	if (DataManager::GetIntValue(RW_DO_SYSTEM_ON_OTA) != 0) {
-		if (free_space - (1500 * 1024 * 1024) < total_bytes) {
-			gui_err("wolf_no_space_ota_survival=Not enough free space on internal storage for creating the OTA survival.");
-			return false;
-	}
-	} else {
-		if (free_space - (100 * 1024 * 1024) < total_bytes) {
-			gui_err("wolf_no_space_ota_survival=Not enough free space on internal storage for creating the OTA survival.");
-			return false;
 		}
-  }
-	part_settings.img_bytes_remaining = part_settings.img_bytes;
-	part_settings.file_bytes_remaining = part_settings.file_bytes;
-
-	
-	if (!TWFunc::Recursive_Mkdir(part_settings.Backup_Folder)) {
-		gui_err("fail_backup_folder=Failed to make backup folder.");
-		return false;
 	}
-
-	DataManager::SetProgress(0.0);
-
-	start_pos = 0;
-	end_pos = Backup_List.find(";", start_pos);
-	while (end_pos != string::npos && start_pos < Backup_List.size()) {
-		if (stop_backup.get_value() != 0)
-			return -1;
-		backup_path = Backup_List.substr(start_pos, end_pos - start_pos);
+	
+    part_settings.img_bytes_remaining = part_settings.img_bytes;
+	part_settings.file_bytes_remaining = part_settings.file_bytes;
+    DataManager::SetProgress(0.0);
+    gui_msg(Msg("backup_folder= * Backup Folder: {1}")(part_settings.Backup_Folder));
+    
+    start_pos = 0;
+	end_pos = Ose_List.find(";", start_pos);
+	while (end_pos != string::npos && start_pos < Ose_List.size()) {
+		backup_path = Ose_List.substr(start_pos, end_pos - start_pos);
 		part_settings.Part = Find_Partition_By_Path(backup_path);
 		if (part_settings.Part != NULL) {
 			if (!Backup_Partition(&part_settings))
 				return false;
 		} else {
-			gui_msg(Msg(msg::kError, "unable_to_locate_partition=Unable to locate '{1}' partition for backup calculations.")(backup_path));
+			gui_msg(Msg(msg::kError, "unable_to_locate_partition=Unable to locate '{1}' partition for backup calculations.")(backup_path));		
 		}
 		start_pos = end_pos + 1;
-		end_pos = Backup_List.find(";", start_pos);
+		end_pos = Ose_List.find(";", start_pos);
 	}
-
-	// Average BPS
-	if (part_settings.img_time == 0)
-		part_settings.img_time = 1;
-	if (part_settings.file_time == 0)
-		part_settings.file_time = 1;
-	int img_bps = (int)part_settings.img_bytes / (int)part_settings.img_time;
-	unsigned long long file_bps = part_settings.file_bytes / (int)part_settings.file_time;
-
 	
-	time(&total_stop);
-	int total_time = (int) difftime(total_stop, total_start);
-
-	    uint64_t actual_backup_size;
-		TWExclude twe;
-		actual_backup_size = twe.Get_Folder_Size(part_settings.Backup_Folder);
-	    actual_backup_size /= (1024LLU * 1024LLU);
-
-	int prev_img_bps = 0, use_compression = 0;
-	unsigned long long prev_file_bps = 0;
-	DataManager::GetValue(TW_BACKUP_AVG_IMG_RATE, prev_img_bps);
-	img_bps += (prev_img_bps * 4);
-	img_bps /= 5;
-
-	DataManager::GetValue(TW_USE_COMPRESSION_VAR, use_compression);
-	if (use_compression)
-		DataManager::GetValue(TW_BACKUP_AVG_FILE_COMP_RATE, prev_file_bps);
-	else
-		DataManager::GetValue(TW_BACKUP_AVG_FILE_RATE, prev_file_bps);
-	file_bps += (prev_file_bps * 4);
-	file_bps /= 5;
-
-	DataManager::SetValue(TW_BACKUP_AVG_IMG_RATE, img_bps);
-	if (use_compression)
-		DataManager::SetValue(TW_BACKUP_AVG_FILE_COMP_RATE, file_bps);
-	else
-		DataManager::SetValue(TW_BACKUP_AVG_FILE_RATE, file_bps);
-
-	Update_System_Details();
+	Update_System_Details(true);
 	UnMount_Main_Partitions();
+	string backup_log = part_settings.Backup_Folder + "/recovery.log";
+	TWFunc::copy_file("/tmp/recovery.log", backup_log, 0644);
+	tw_set_default_metadata(backup_log.c_str());
 	return true;
-}	
-			
-
-int TWPartitionManager::Run_Custom_Restore(const string& Restore_Name) {
+}
+		
+int TWPartitionManager::Run_OTA_Survival_Restore(const string& folder) {
 	PartitionSettings part_settings;
-	int check_digest = 0;
-
-	time_t rStart, rStop;
-	time(&rStart);
 	string Restore_List, restore_path;
 	size_t start_pos = 0, end_pos;
 
-	part_settings.Backup_Folder = Restore_Name;
+	part_settings.Backup_Folder = folder;
 	part_settings.Part = NULL;
 	part_settings.partition_count = 0;
 	part_settings.total_restore_size = 0;
 	part_settings.adbbackup = false;
 	part_settings.PM_Method = PM_RESTORE;
 
-	TWPartition *redwolf = Get_Default_Storage_Partition();
-	if (redwolf)
-    DataManager::SetValue("tw_storage_path", redwolf->Storage_Path);
-    else
-    DataManager::SetValue("tw_storage_path", "/");
-    
-    DataManager::GetValue("tw_restore_list", Restore_List);
-
-    TWPartition* survival_sys = PartitionManager.Find_Partition_By_Path("/system_image");
-    if (survival_sys == NULL || survival_sys->Current_File_System != "emmc" || !survival_sys->Can_Be_Backed_Up) {
-	LOGERR("OTA_Survival: Please set \"/system_image\" in to fstab and be sure that it can be backed up!");
+	if (!PartitionManager.Mount_By_Path(folder, false))
     return false;
-   }
-
-	if (!Mount_Current_Storage(true))
-		return false;
+    
+    Set_Restore_Files(folder);
+	DataManager::GetValue("tw_restore_selected", Restore_List);
 
 	if (!Restore_List.empty()) {
 		end_pos = Restore_List.find(";", start_pos);
@@ -3199,12 +3183,12 @@ int TWPartitionManager::Run_Custom_Restore(const string& Restore_Name) {
 			restore_path = Restore_List.substr(start_pos, end_pos - start_pos);
 			part_settings.Part = Find_Partition_By_Path(restore_path);
 			if (part_settings.Part != NULL) {
-				if (part_settings.Part->Mount_Read_Only)
+				if (part_settings.Part->Mount_Read_Only) {
+					gui_msg(Msg(msg::kError, "restore_read_only=Cannot restore {1} -- mounted read only.")(part_settings.Part->Backup_Display_Name));
 					return false;
-
+				}
 				string Full_Filename = part_settings.Backup_Folder + "/" + part_settings.Part->Backup_FileName;
-
-				if (check_digest > 0 && !twrpDigestDriver::Check_Digest(Full_Filename))
+				if (!twrpDigestDriver::Check_Digest(Full_Filename))
 					return false;
 				part_settings.partition_count++;
 				part_settings.total_restore_size += part_settings.Part->Get_Restore_Size(&part_settings);
@@ -3215,8 +3199,6 @@ int TWPartitionManager::Run_Custom_Restore(const string& Restore_Name) {
 					for (subpart = Partitions.begin(); subpart != Partitions.end(); subpart++) {
 						part_settings.Part = *subpart;
 						if ((*subpart)->Is_SubPartition && (*subpart)->SubPartition_Of == parentPart->Mount_Point) {
-							if (check_digest > 0 && !twrpDigestDriver::Check_Digest(Full_Filename))
-								return false;
 							part_settings.total_restore_size += (*subpart)->Get_Restore_Size(&part_settings);
 						}
 					}
@@ -3228,16 +3210,14 @@ int TWPartitionManager::Run_Custom_Restore(const string& Restore_Name) {
 			end_pos = Restore_List.find(";", start_pos);
 		}
 	}
-
 	if (part_settings.partition_count == 0) {
 		gui_err("no_part_restore=No partitions selected for restore.");
 		return false;
 	}
-
+	gui_msg(Msg("restore_folder=Restore folder: '{1}'")(part_settings.Backup_Folder));
 	DataManager::SetProgress(0.0);
 	ProgressTracking progress(part_settings.total_restore_size);
 	part_settings.progress = &progress;
-
 	start_pos = 0;
 	if (!Restore_List.empty()) {
 		end_pos = Restore_List.find(";", start_pos);
@@ -3257,13 +3237,10 @@ int TWPartitionManager::Run_Custom_Restore(const string& Restore_Name) {
 		}
 	}
 	UnMount_By_Path("/system", false);
-	Update_System_Details();
+	Update_System_Details(true);
 	UnMount_Main_Partitions();
-	time(&rStop);
 	DataManager::SetValue("tw_file_progress", "");
-
 	return true;
 }
 	
-
-
+	    

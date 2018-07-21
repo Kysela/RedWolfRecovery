@@ -12,7 +12,7 @@
 		
 	<page name="clear_vars">
 			<action>
-				<action function="set">tw_operation_state=0</action>
+				<action function="clear">tw_operation_state</action>
 				<action function="set">tw_text1=</action>
 				<action function="set">tw_text2=</action>
 				<action function="set">tw_text3=</action>
@@ -20,15 +20,15 @@
 				<action function="set">tw_action_text1=</action>
 				<action function="set">tw_action_text2=</action>
 				<action function="set">tw_action_param=</action>
-				<action function="set">tw_has_action2=0</action>
-				<action function="set">tw_action2=</action>
+				<action function="clear">tw_has_action2</action>
+				<action function="clear">tw_action2</action>
 				<action function="set">tw_action2_param=</action>
-				<action function="set">tw_has_cancel=0</action>
+				<action function="clear">tw_has_cancel</action>
 				<action function="set">tw_cancel_action=</action>
 				<action function="set">tw_cancel_param=</action>
-				<action function="set">tw_show_exclamation=0</action>
-				<action function="set">tw_show_reboot=0</action>
-				<action function="page">%tw_clear_destination%</action>
+				<action function="clear">tw_show_exclamation</action>
+				<action function="clear">tw_show_reboot</action>
+				<action function="page">main2</action>
 			</action>
 		</page>
 		
@@ -42,7 +42,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<button>
@@ -156,7 +156,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -176,7 +176,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 	        <image>
@@ -213,106 +213,63 @@
 			<fill color="%text_actionbar%">
 				<placement x="0" y="%tab_indicator_y%" w="%tab4_width%" h="%tab_indicator_height%"/>
 			</fill>
-
+			
 			<image>
-				<placement x="%col1_x%" y="%row2_2_y%"/>
+				<placement x="%col1_x%" y="%row2_1_y%"/>
 				<image resource="icon_info"/>
 			</image>
+			
+			<text style="text_body2_light_green">
+				<placement x="%col1_x_indent%" y="%row2_1_y%"/>
+				<text>{@wolf_ose_force_zip_entry_info1=}</text>
+			</text>
 
-			<text style="text_body2">
+			<text style="text_body2_light_green">
 				<placement x="%col1_x_indent%" y="%row2_2_y%"/>
-				<text>{@wolf_install_section_info1=}</text>
+				<text>{@wolf_ose_force_zip_entry_info2=}</text>
 			</text>
-
-			<text style="text_body2">
+			
+			<text style="text_body2_light_green">
 				<placement x="%col1_x_indent%" y="%row2_3_y%"/>
-				<text>{@wolf_install_section_info2=}</text>
+				<text>{@wolf_ose_force_zip_entry_info3=}</text>
 			</text>
 			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row3_1_y%"/>
-				<text>{@wolf_install_section_info3=}</text>
-			</text>
+			<checkbox style="checkbox_big">
+				<placement x="48" y="%row3_2_y%"/>
+				<text>{@wolf_ose_force_zip_entry_chk=}</text>
+				<data variable="wolf_ose_force_zip_entry"/>
+			</checkbox>
 			
-			<text style="text_body2_green">
-				<placement x="%col1_x_indent%" y="%row3_3_y%"/>
-				<text>{@wolf_install_section_info4_title=RedWolf's OTA Survival}</text>
-			</text>
-			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row4_1_y%"/>
-				<text>{@wolf_install_section_info4=}</text>
+			<text style="caption">
+				<placement x="%col1_x%" y="%row4_2_y%"/>
+				<text>OSE {@partitions=Partitions}</text>
 			</text>
 
-          <text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row4_2_y%"/>
-				<text>{@wolf_install_section_info5=}</text>
+			<partitionlist>
+				<placement x="%col1_x%" y="%row4_3_y%" w="%listbox_w%" h="%row1_2_y%"/>
+				<data name="rw_ose_list"/>
+				<listtype name="ose"/>
+			</partitionlist>
+			
+			<text style="caption">
+				<placement x="%col1_x%" y="%row7_1_y%"/>
+				<text>{@ose_storages=}</text>
 			</text>
 			
-			<text style="text_body2_hl">
-				<placement x="%col1_x_indent%" y="%row4_3_y%"/>
-				<text>t.me/RedWolfRecovery</text>
-			</text>
-			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row5_1_y%"/>
-				<text>{@wolf_install_section_info6=}</text>
-			</text>
-			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row5_2_y%"/>
-				<text>{@wolf_install_section_info7=}</text>
-			</text>
-			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row5_3_y%"/>
-				<text>{@wolf_install_section_info8=}</text>
-			</text>
-			
-			
-		 <text style="text_body2_green">
-				<placement x="%col1_x_indent%" y="%row6_2_y%"/>
-				<text>Dumwolf Driver</text>
-			</text>
-			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row6_3_y%"/>
-				<text>{@wolf_install_section_info9=}</text>
-			</text>
-			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row7_1_y%"/>
-				<text>{@wolf_install_section_info10=}</text>
-			</text>
-			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row7_2_y%"/>
-				<text>{@wolf_install_section_info11=}</text>
-			</text>
-			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row7_3_y%"/>
-				<text>{@wolf_install_section_info12=}</text>
-			</text>
-			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row8_1_y%"/>
-				<text>{@wolf_install_section_info13=}</text>
-			</text>
-			
-			<text style="text_body2">
-				<placement x="%col1_x_indent%" y="%row8_2_y%"/>
-				<text>{@wolf_install_section_info14=}</text>
-			</text>
+			<partitionlist>
+				<placement x="%col1_x%" y="%row7_2_y%" w="%listbox_w%" h="%row1_2_y%"/>
+				<data name="rw_ose_path"/>
+				<listtype name="osestorage"/>
+			</partitionlist>
 
 				<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 		
@@ -332,7 +289,7 @@
 
 			<text style="text_ab_title">
 				<placement x="%col1_x_indent%" y="%ab_bc_y%"/>
-				<text>RedWolf</text>
+				<text>Recovery</text>
 			</text>
 
 			<template name="action_page_console"/>
@@ -356,7 +313,7 @@
 				</conditions>
 			 <actions>
 				<action function="set">tw_page_done=1</action>
-				<action function="page">main</action>
+				<action function="home"/>
 		   </actions>
 		</action>
 		</page>
@@ -462,7 +419,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -589,9 +546,9 @@
 			    <action function="set">tw_droid_password_change_xd1=</action>
 				<action function="set">tw_droid_password_change_xd2=</action>
 				<action function="set">tw_droid_password_change_xd3=</action>
-				<action function="set">checkbox_pass_change5-6=0</action>
-				<action function="set">checkbox_pass_change3-4=0</action>
-				<action function="set">checkbox_pass_change_1-2=0</action>
+				<action function="clear">checkbox_pass_change5-6</action>
+				<action function="clear">checkbox_pass_change3-4</action>
+				<action function="clear">checkbox_pass_change_1-2</action>
                 <action function="page">pass_change1</action>
                 </actions>
 			</button>
@@ -638,7 +595,7 @@
 				<condition var1="tw_allow_partition_sdcard" var2="1"/>
 				<placement x="%col1_x%" y="%mb_row7_y%" w="%content_w%" h="%mb_h%"/>
 				<actions>
-					<action function="set">partitionlisterror=0</action>
+					<action function="clear">partitionlisterror</action>
 					<action function="page">partsdcardsel</action>
 				</actions>
 			</button>
@@ -655,12 +612,12 @@
 			
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 		
@@ -709,12 +666,12 @@
 
 			<action>
 				<touch key="power+volup"/>
-				<action function="screenshotexternal"/>
+				<action function="screenshot"/>
 			</action>
 
 <action>
 				<touch key="power+voldown"/>
-				<action function="screenshotinternal"/>
+				<action function="screenshot"/>
 			</action>
 		</page>
 
@@ -827,7 +784,6 @@
 </actions>
 </action>
 </page>
-
 
 <page name="pass_change2">			
 
@@ -1940,7 +1896,7 @@
 					<action function="set">tw_back=main</action>
 					<action function="set">tw_action=setpassword</action>
 					<action function="set">tw_action_param=%tw_droid_password_change_xd3%</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@wolf_please_wait=Setting up new password...}</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1={@pass_hdr3=Password change completed}</action>
@@ -2010,7 +1966,7 @@
 					<action function="set">tw_back=main</action>
 					<action function="set">tw_action=setpassword</action>
 					<action function="set">tw_action_param=%tw_droid_password_new2%</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@wolf_please_wait=Setting up new password...}</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1={@pass_hdr3=Password change completed}</action>
@@ -2082,7 +2038,7 @@
                <actions>
 					<action function="set">tw_back=main</action>
 					<action function="set">tw_action=removepassword</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1=</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1=</action>
@@ -2470,7 +2426,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -2491,13 +2447,13 @@
 
 			<button>
 				<placement x="%tab4_col3_x%" y="%tab_y%" placement="4"/>
-				<image resource="tab_display"/>
+				<image resource="tab_vibration"/>
 				<action function="page">screen</action>
 			</button>
 
 			<button>
 				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
-				<image resource="tab_vibration"/>
+				<image resource="tab_language"/>
 				<action function="page">vibrate</action>
 			</button>
 
@@ -2521,8 +2477,8 @@
 				<listitem name="{@use_rmrf_chk=Use rm -rf instead of formatting}">
 					<data variable="tw_rm_rf"/>
 				</listitem>
-				<listitem name="{@wolf_advanced_stock_recovery=}">
-					<data variable="wolf_reboot_advanced_stock_recovery_check"/>
+				<listitem name="{@wolf_ors_allow_reboot_chk=}">
+					<data variable="wolf_ors_allow_reboot"/>
 				</listitem>
 				<listitem name="{@wolf_boot_t2w=}">
 					<data variable="wolf_boot_t2w_check"/>
@@ -2552,34 +2508,16 @@
 				</listitem>
 			</listbox>
 			
-		   <text style="caption">
-				<placement x="%col1_x%" y="%row6_3_y%" />
-				<text>{@language_cptn=Language}</text>
-			</text>
-			
-			
-			<listbox>
-				<placement x="%col1_x%" y="%row7_1_y%" w="%listbox_w%" h="%listbox_settings_lang_height%"/>
-				<data name="tw_language"/>
-			</listbox>
-
-			<button>
-				<condition var1="tw_language" op="modified"/>
-				<placement x="%btn_float_x%" y="%row7_3a_y%"/>
-				<image resource="btn_float_accept"/>
-				<highlight color="%highlight_color%"/>
-				<action function="setlanguage"></action>
-			</button>
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 
 			<action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -2593,7 +2531,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -2620,13 +2558,13 @@
 
 			<button>
 				<placement x="%tab4_col3_x%" y="%tab_y%" placement="4"/>
-				<image resource="tab_display"/>
+				<image resource="tab_vibration"/>
 				<action function="page">screen</action>
 			</button>
 
 			<button>
 				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
-				<image resource="tab_vibration"/>
+				<image resource="tab_language"/>
 				<action function="page">vibrate</action>
 			</button>
 
@@ -2710,7 +2648,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 
@@ -2730,7 +2668,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -2758,152 +2696,17 @@
 
 			<image>
 				<placement x="%tab4_col3_x%" y="%tab_y%" placement="4"/>
-				<image resource="tab_display_a"/>
+				<image resource="tab_vibration_a"/>
 			</image>
 
 			<button>
 				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
-				<image resource="tab_vibration"/>
+				<image resource="tab_language"/>
 				<action function="page">vibrate</action>
 			</button>
 
 			<fill color="%text_actionbar%">
 				<placement x="%center_x%" y="%tab_indicator_y%" w="%tab4_width%" h="%tab_indicator_height%"/>
-			</fill>
-
-			<text style="caption">
-				<placement x="%col1_x%" y="%row2_1_y%"/>
-				<text>{@settings_screen_cptn=Screen Settings}</text>
-			</text>
-
-			<text style="text_body2">
-				<condition var1="tw_has_brightnesss_file" var2="1"/>
-				<placement x="%col1_x%" y="%row2_2a_y%"/>
-				<text>{@screen_bright_slider=Brightness: %tw_brightness_pct%%}</text>
-			</text>
-
-			<slidervalue>
-				<condition var1="tw_has_brightnesss_file" var2="1"/>
-				<placement x="%slider_x%" y="%row2_3_y%" w="%slidervalue_w%"/>
-				<resource background="slider" handle="handle" handlehover="handle_h"/>
-				<font resource="caption" color="%text%"/>
-				<colors line="%text_dark%" slider="%accent%"/>
-				<dimensions lineh="%slidervalue_lineh%" linepadding="%slidervalue_padding%" sliderw="%slidervalue_sliderw%" sliderh="%slidervalue_sliderh%"/>
-				<data variable="tw_brightness_pct" min="10" max="100" showrange="0" showcurr="0" changeondrag="1"/>
-				<actions>
-					<action function="set">tw_brightness=%tw_brightness_max%</action>
-					<action function="compute">tw_brightness*%tw_brightness_pct%</action>
-					<action function="compute">tw_brightness/100</action>
-					<action function="setbrightness">%tw_brightness%</action>
-				</actions>
-			</slidervalue>
-
-			<text style="text_body2">
-				<condition var1="tw_screen_timeout_secs" op="=" var2="0"/>
-				<condition var1="tw_no_screen_timeout" op="!=" var2="1"/>
-				<placement x="%col1_x%" y="%row4_1_y%"/>
-				<text>{@settings_screen_timeout_cptn=Timeout}</text>
-			</text>
-
-			<text style="text_body2">
-				<condition var1="tw_screen_timeout_secs" op="!=" var2="0"/>
-				<condition var1="tw_no_screen_timeout" op="!=" var2="1"/>
-				<placement x="%col1_x%" y="%row4_1_y%"/>
-				<text>{@settings_screen_timeout_cptn2=Timeout:} %tw_screen_timeout_secs% {@timeout_unit=seconds}</text>
-			</text>
-
-			<button>
-				<condition var1="tw_screen_timeout_secs" op="=" var2="0"/>
-				<condition var1="tw_no_screen_timeout" op="!=" var2="1"/>
-				<placement x="%col1_x%" y="%row4_2_y%" textplacement="6"/>
-				<font resource="body1" color="%text%"/>
-				<text>{@enable_timeout_chk=Enable screen timeout}</text>
-				<image resource="checkbox_false"/>
-				<action function="set">tw_screen_timeout_secs=60</action>
-			</button>
-
-			<button>
-				<condition var1="tw_screen_timeout_secs" op="!=" var2="0"/>
-				<condition var1="tw_no_screen_timeout" op="!=" var2="1"/>
-				<placement x="%col1_x%" y="%row4_2_y%" textplacement="6"/>
-				<font resource="body1" color="%text%"/>
-				<text>{@enable_timeout_chk=Enable screen timeout}</text>
-				<image resource="checkbox_true"/>
-				<action function="set">tw_screen_timeout_secs=0</action>
-			</button>
-
-			<slidervalue>
-				<condition var1="tw_screen_timeout_secs" op="!=" var2="0"/>
-				<condition var1="tw_no_screen_timeout" op="!=" var2="1"/>
-				<placement x="%slider_x%" y="%row4_3_y%" w="%slidervalue_w%"/>
-				<resource background="slider" handle="handle" handlehover="handle_h"/>
-				<font resource="caption" color="%text%"/>
-				<colors line="%text_dark%" slider="%accent%"/>
-				<dimensions lineh="%slidervalue_lineh%" linepadding="%slidervalue_padding%" sliderw="%slidervalue_sliderw%" sliderh="%slidervalue_sliderh%"/>
-				<data variable="tw_screen_timeout_secs" min="15" max="300" showrange="0" showcurr="0" changeondrag="1"/>
-			</slidervalue>
-
-<action>
-				<touch key="home"/>
-				<action function="page">main</action>
-			</action>
-
-
-			<action>
-				<touch key="back"/>
-				<action function="page">settings</action>
-			</action>
-		</page>
-
-		<page name="vibrate">
-			<template name="body"/>
-
-			<template name="ab_tab"/>
-
-			<template name="statusbarinfo"/>
-
-			<button>
-				<placement x="%ab_back_x%" y="%ab_y%"/>
-				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
-			</button>
-
-			<text style="text_ab_title">
-				<placement x="%col1_x_indent%" y="%ab_bc_y%"/>
-				<text>{@settings_hdr=Settings}</text>
-			</text>
-
-			<button>
-				<placement x="%tab4_col1_x%" y="%tab_y%" placement="4"/>
-				<image resource="tab_misc"/>
-				<action function="page">settings</action>
-			</button>
-			
-			<!--button>
-				<placement x="%ab_btn1_x%" y="%ab_y%"/>
-				<image resource="actionbar_reset" highlightresource="actionbar_reset_hl"/>
-				<action function="overlay">dialog_reset</action>
-			</button-->
-
-			<button>
-				<placement x="%tab4_col2_x%" y="%tab_y%" placement="4"/>
-				<image resource="tab_time"/>
-				<action function="page">timezone</action>
-			</button>
-
-			<button>
-				<placement x="%tab4_col3_x%" y="%tab_y%" placement="4"/>
-				<image resource="tab_display"/>
-				<action function="page">screen</action>
-			</button>
-
-			<image>
-				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
-				<image resource="tab_vibration_a"/>
-			</image>
-
-			<fill color="%text_actionbar%">
-				<placement x="%tab4_ind4_x%" y="%tab_indicator_y%" w="%tab4_width%" h="%tab_indicator_height%"/>
 			</fill>
 
 			<text style="caption">
@@ -2966,10 +2769,92 @@
 				<dimensions lineh="%slidervalue_lineh%" linepadding="%slidervalue_padding%" sliderw="%slidervalue_sliderw%" sliderh="%slidervalue_sliderh%"/>
 				<data variable="wolf_data_boot_vibrate" min="0" max="500" showrange="0" showcurr="0" changeondrag="1"/>
 			</slidervalue>
+
+<action>
+				<touch key="home"/>
+				<action function="home"/>
+			</action>
+
+
+			<action>
+				<touch key="back"/>
+				<action function="page">settings</action>
+			</action>
+		</page>
+
+		<page name="vibrate">
+			<template name="body"/>
+
+			<template name="ab_tab"/>
+
+			<template name="statusbarinfo"/>
+
+			<button>
+				<placement x="%ab_back_x%" y="%ab_y%"/>
+				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
+				<action function="home"/>
+			</button>
+
+			<text style="text_ab_title">
+				<placement x="%col1_x_indent%" y="%ab_bc_y%"/>
+				<text>{@settings_hdr=Settings}</text>
+			</text>
+
+			<button>
+				<placement x="%tab4_col1_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_misc"/>
+				<action function="page">settings</action>
+			</button>
+			
+			<!--button>
+				<placement x="%ab_btn1_x%" y="%ab_y%"/>
+				<image resource="actionbar_reset" highlightresource="actionbar_reset_hl"/>
+				<action function="overlay">dialog_reset</action>
+			</button-->
+
+			<button>
+				<placement x="%tab4_col2_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_time"/>
+				<action function="page">timezone</action>
+			</button>
+
+			<button>
+				<placement x="%tab4_col3_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_vibration"/>
+				<action function="page">screen</action>
+			</button>
+
+			<image>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_language_a"/>
+			</image>
+
+			<fill color="%text_actionbar%">
+				<placement x="%tab4_ind4_x%" y="%tab_indicator_y%" w="%tab4_width%" h="%tab_indicator_height%"/>
+			</fill>
+			
+			<text style="caption">
+				<placement x="%col1_x%" y="%row2_1_y%" />
+				<text>{@language_cptn=Language}</text>
+			</text>
+			
+			
+			<listbox>
+				<placement x="%col1_x%" y="%row2_2_y%" w="%listbox_w%" h="%fileselector_install_height%"/>
+				<data name="tw_language"/>
+			</listbox>
+
+			<button>
+				<condition var1="tw_language" op="modified"/>
+				<placement x="%btn_float_x%" y="%row7_3a_y%"/>
+				<image resource="btn_float_accept"/>
+				<highlight color="%highlight_color%"/>
+				<action function="setlanguage"></action>
+			</button>
 			
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -2990,7 +2875,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 			
 			<button>
@@ -3079,7 +2964,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -3100,7 +2985,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<button>
@@ -3253,7 +3138,7 @@
 			
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -3373,7 +3258,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -3472,7 +3357,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -3486,7 +3371,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -3662,7 +3547,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -3677,7 +3562,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -3735,7 +3620,7 @@
 				<actions>
 					<action function="set">tw_back=flash_image_confirm</action>
 					<action function="set">tw_action=flashimage</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@flashing_image=Flashing Image...}</action>
 					<action function="set">tw_action_text2=%tw_file%</action>
 					<action function="set">tw_complete_text1={@image_flashed=Image Flashed}</action>
@@ -3751,7 +3636,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -3786,7 +3671,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -3900,7 +3785,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -4021,7 +3906,7 @@
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
 				<actions>
 	            <action function="disableled"/>
-				<action function="page">main</action>
+				<action function="home"/>
 				</actions>
 			</button>
 
@@ -4290,7 +4175,7 @@
 					<action function="set">tw_back=main</action>
 					<action function="set">tw_action=reboot</action>
 					<action function="set">tw_reboot_param=recovery</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@no_os1=No OS Installed!}</action>
 					<action function="set">tw_text2={@no_osrb=Are you sure you wish to reboot?}</action>
 					<action function="set">tw_action_text1={@rebooting=Rebooting...}</action>
@@ -4331,7 +4216,7 @@
 			<action>
 				<action function="set">tw_action=reboot</action>
 				<action function="set">tw_action_param=system</action>
-				<action function="set">tw_has_action2=0</action>
+				<action function="clear">tw_has_action2</action>
 				<action function="set">tw_text1={@no_os1=No OS Installed!}</action>
 				<action function="set">tw_text2={@no_osrb=Are you sure you wish to reboot?}</action>
 				<action function="set">tw_text3=</action>
@@ -4354,7 +4239,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -4428,7 +4313,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -4660,7 +4545,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -4708,7 +4593,7 @@
 					<action function="set">tw_action=reboot</action>
 					<action function="set">tw_action_param=recovery</action>
 					<action function="set">tw_reboot_param=recovery</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@no_os1=No OS Installed!}</action>
 					<action function="set">tw_text2={@no_osrb=Are you sure you wish to reboot?}</action>
 					<action function="set">tw_action_text1={@rebooting=Rebooting...}</action>
@@ -4747,7 +4632,7 @@
 					<action function="set">tw_action=reboot</action>
 					<action function="set">tw_action_param=bootloader</action>
 					<action function="set">tw_reboot_param=bootloader</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@no_os1=No OS Installed!}</action>
 					<action function="set">tw_text2={@no_osrb=Are you sure you wish to reboot?}</action>
 					<action function="set">tw_action_text1={@rebooting=Rebooting...}</action>
@@ -4786,7 +4671,7 @@
 					<action function="set">tw_action=reboot</action>
 					<action function="set">tw_action_param=download</action>
 					<action function="set">tw_reboot_param=download</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@no_os1=No OS Installed!}</action>
 					<action function="set">tw_text2={@no_osrb=Are you sure you wish to reboot?}</action>
 					<action function="set">tw_action_text1={@rebooting=Rebooting...}</action>
@@ -4825,7 +4710,7 @@
 					<action function="set">tw_action=reboot</action>
 					<action function="set">tw_action_param=bootloader</action>
 					<action function="set">tw_reboot_param=bootloader</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@no_os1=No OS Installed!}</action>
 					<action function="set">tw_text2={@no_osrb=Are you sure you wish to reboot?}</action>
 					<action function="set">tw_action_text1={@rebooting=Rebooting...}</action>
@@ -4864,7 +4749,7 @@
 					<action function="set">tw_action=reboot</action>
 					<action function="set">tw_action_param=download</action>
 					<action function="set">tw_reboot_param=download</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@no_os1=No OS Installed!}</action>
 					<action function="set">tw_text2={@no_osrb=Are you sure you wish to reboot?}</action>
 					<action function="set">tw_action_text1={@rebooting=Rebooting...}</action>
@@ -4966,7 +4851,7 @@
 					<action function="set">tw_action=reboot</action>
 					<action function="set">tw_action_param=poweroff</action>
 					<action function="set">tw_reboot_param=poweroff</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@no_os1=No OS Installed!}</action>
 					<action function="set">tw_text2={@no_ospo=Are you sure you wish to power off?}</action>
 					<action function="set">tw_action_text1={@turning_off=Turning Off...}</action>
@@ -5005,7 +4890,7 @@
 					<action function="set">tw_action=reboot</action>
 					<action function="set">tw_action_param=poweroff</action>
 					<action function="set">tw_reboot_param=poweroff</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@no_os1=No OS Installed!}</action>
 					<action function="set">tw_text2={@no_ospo=Are you sure you wish to power off?}</action>
 					<action function="set">tw_action_text1={@turning_off=Turning Off...}</action>
@@ -5047,7 +4932,7 @@
 					<action function="set">tw_action=reboot</action>
 					<action function="set">tw_action_param=poweroff</action>
 					<action function="set">tw_reboot_param=poweroff</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@no_os1=No OS Installed!}</action>
 					<action function="set">tw_text2={@no_ospo=Are you sure you wish to power off?}</action>
 					<action function="set">tw_action_text1={@turning_off=Turning Off...}</action>
@@ -5099,7 +4984,7 @@
 					<action function="set">tw_back=backup_options</action>
 					<action function="set">tw_action=setbootslot</action>
 					<action function="set">tw_action_param=A</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@changing_boot_slot=Changing Boot Slot}</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1={@changing_boot_slot_complete=Change Boot Slot Complete}</action>
@@ -5118,7 +5003,7 @@
 					<action function="set">tw_back=backup_options</action>
 					<action function="set">tw_action=setbootslot</action>
 					<action function="set">tw_action_param=A</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@changing_boot_slot=Changing Boot Slot}</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1={@changing_boot_slot_complete=Change Boot Slot Complete}</action>
@@ -5137,7 +5022,7 @@
 					<action function="set">tw_back=backup_options</action>
 					<action function="set">tw_action=setbootslot</action>
 					<action function="set">tw_action_param=B</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@changing_boot_slot=Changing Boot Slot}</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1={@changing_boot_slot_complete=Change Boot Slot Complete}</action>
@@ -5156,7 +5041,7 @@
 					<action function="set">tw_back=backup_options</action>
 					<action function="set">tw_action=setbootslot</action>
 					<action function="set">tw_action_param=B</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@changing_boot_slot=Changing Boot Slot}</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1={@changing_boot_slot_complete=Change Boot Slot Complete}</action>
@@ -5166,12 +5051,12 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -5209,7 +5094,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -5289,7 +5174,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -5328,7 +5213,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -5396,12 +5281,12 @@
 			
             <action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 			
 			<action>
@@ -5453,7 +5338,7 @@
 
              <action>
 	          <condition var1="tw_backup_system_size" op="&lt;" var2="%tw_min_system%"/>
-				<action function="page">wolf_reboot_no_os</action>
+				<action function="page">confirm_action</action>
 			</action>
 		</page>
 
@@ -5467,7 +5352,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -5541,7 +5426,7 @@
 					<action function="set">tw_back=wipe</action>
 					<action function="set">tw_action=wipe</action>
 					<action function="set">tw_action_param=DATAMEDIA</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@wipe_enc_confirm=Wipe Encryption from Data?}</action>
 					<action function="set">tw_text2=</action>
 					<action function="set">tw_action_text1={@formatting_data=Formatting Data...}</action>
@@ -5580,13 +5465,13 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 
 			<action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -5605,7 +5490,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -5689,7 +5574,7 @@
 					<action function="set">tw_back=advancedwipe</action>
 					<action function="set">tw_action=wipe</action>
 					<action function="set">tw_action_param=LIST</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@wipe_sel_confirm=Wipe Selected Partition(s)?}</action>
 					<action function="set">tw_action_text1=Wipe</action>
 					<action function="set">tw_action_text2={@wiping_part=Wiping Partition(s)...}</action>
@@ -5701,7 +5586,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 
@@ -5722,7 +5607,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -5801,7 +5686,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -5859,7 +5744,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -5998,7 +5883,7 @@
 					<action function="set">tw_back=partitionoptions</action>
 					<action function="set">tw_action=repair</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@repair_confirm=Repair %tw_partition_name%?}</action>
 					<action function="set">tw_text2=</action>
 					<action function="set">tw_action_text1={@repairing=Repairing...}</action>
@@ -6016,7 +5901,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -6059,7 +5944,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -6132,7 +6017,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=ext2</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=EXT2</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6153,7 +6038,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=ext2</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=EXT2</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6174,7 +6059,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=ext3</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=EXT3</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6195,7 +6080,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=ext3</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=EXT3</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6216,7 +6101,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=ext4</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=EXT4</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6237,7 +6122,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=ext4</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=EXT4</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6258,7 +6143,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=fat</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=FAT</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6279,7 +6164,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=fat</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=FAT</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6300,7 +6185,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=exfat</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=exFAT</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6321,7 +6206,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=exfat</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=exFAT</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6342,7 +6227,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=f2fs</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=F2FS</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6363,7 +6248,7 @@
 					<action function="set">tw_action=changefilesystem</action>
 					<action function="set">tw_action_param=%tw_partition_mount_point%</action>
 					<action function="set">tw_action_new_file_system=f2fs</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_text1={@change_fs_confirm=Change %tw_partition_name%?}</action>
 					<action function="set">tw_text2=F2FS</action>
 					<action function="set">tw_action_text1={@formatting=Formatting...}</action>
@@ -6385,7 +6270,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -6404,7 +6289,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -6451,7 +6336,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -6609,7 +6494,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -6736,12 +6621,12 @@
 			
 <action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -6755,7 +6640,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -6841,7 +6726,7 @@
 					<action function="set">tw_back=backup_options</action>
 					<action function="set">tw_action=setbootslot</action>
 					<action function="set">tw_action_param=A</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@changing_boot_slot=Changing Boot Slot}</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1={@changing_boot_slot_complete=Change Boot Slot Complete}</action>
@@ -6860,7 +6745,7 @@
 					<action function="set">tw_back=backup_options</action>
 					<action function="set">tw_action=setbootslot</action>
 					<action function="set">tw_action_param=A</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@changing_boot_slot=Changing Boot Slot}</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1={@changing_boot_slot_complete=Change Boot Slot Complete}</action>
@@ -6879,7 +6764,7 @@
 					<action function="set">tw_back=backup_options</action>
 					<action function="set">tw_action=setbootslot</action>
 					<action function="set">tw_action_param=B</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@changing_boot_slot=Changing Boot Slot}</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1={@changing_boot_slot_complete=Change Boot Slot Complete}</action>
@@ -6898,7 +6783,7 @@
 					<action function="set">tw_back=backup_options</action>
 					<action function="set">tw_action=setbootslot</action>
 					<action function="set">tw_action_param=B</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action_text1={@changing_boot_slot=Changing Boot Slot}</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_complete_text1={@changing_boot_slot_complete=Change Boot Slot Complete}</action>
@@ -6908,7 +6793,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -6927,7 +6812,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -7041,7 +6926,7 @@
 					<action function="set">tw_backup_password2=</action>
 					<action function="set">tw_backup_encrypt_display=</action>
 					<action function="set">tw_backup_encrypt_display2=</action>
-					<action function="page">main</action>
+					<action function="home"/>
 				</actions>
 			</action>
 
@@ -7068,7 +6953,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -7170,7 +7055,7 @@
 					<action function="set">tw_backup_password2=</action>
 					<action function="set">tw_backup_encrypt_display=</action>
 					<action function="set">tw_backup_encrypt_display2=</action>
-					<action function="page">main</action>
+					<action function="home"/>
 				</actions>
 			</action>
 
@@ -7209,7 +7094,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -7353,7 +7238,7 @@
 				<touch key="home"/>
 				<actions>
 					<action function="set">tw_backup_name={@auto_generate=(Auto Generate)}</action>
-					<action function="page">main</action>
+					<action function="home"/>
 				</actions>
 			</action>
 
@@ -7584,7 +7469,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -7645,12 +7530,12 @@
 
 			<action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -7681,7 +7566,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -7778,7 +7663,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -7858,7 +7743,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -7957,7 +7842,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -7976,7 +7861,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -8049,7 +7934,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -8068,7 +7953,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -8113,7 +7998,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -8206,7 +8091,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -8248,7 +8133,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -8423,7 +8308,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -8561,12 +8446,12 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -8760,7 +8645,7 @@
 				<touch key="home"/>
 				<actions>
 					<action function="set">tw_page_done=1</action>
-					<action function="page">main</action>
+					<action function="home"/>
 				</actions>
 			</action>
 
@@ -8788,7 +8673,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="page">decrypt</action>
 			</button>
 
 			<text style="text_ab_title">
@@ -8870,18 +8755,12 @@
 
 			<action>
 				<touch key="home"/>
-				<actions>
-					<action function="set">tw_page_done=1</action>
-					<action function="page">main</action>
-				</actions>
+				<action function="page">decrypt</action>
 			</action>
 
 			<action>
 				<touch key="back"/>
-				<actions>
-					<action function="set">tw_page_done=1</action>
-					<action function="page">main</action>
-				</actions>
+				<action function="page">decrypt</action>
 			</action>
 		</page>
 
@@ -8895,7 +8774,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="page">decrypt_pattern</action>
 			</button>
 
 			<text style="text_ab_title">
@@ -8982,18 +8861,12 @@
 
 			<action>
 				<touch key="home"/>
-				<actions>
-					<action function="set">tw_page_done=1</action>
-					<action function="page">main</action>
-				</actions>
+				<action function="page">decrypt_pattern</action>
 			</action>
 
 			<action>
 				<touch key="back"/>
-				<actions>
-					<action function="set">tw_page_done=1</action>
-					<action function="page">main</action>
-				</actions>
+				<action function="page">decrypt_pattern</action>
 			</action>
 		</page>
 
@@ -9043,7 +8916,7 @@
 					<condition var1="tw_operation_state" var2="1"/>
 					<condition var1="tw_operation_status" op="=" var2="0"/>
 				</conditions>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -9057,7 +8930,7 @@
 				<filter folders="1" files="1"/>
 				<path name="tw_file_location1" default="/"/>
 				<data name="tw_filename1"/>
-				<selection name="tw_selection1"/>
+				<selection name="tw_selection1" multiple="true"/>
 			</fileselector>
 
 			<fileselector style="fileselector_s">
@@ -9067,7 +8940,7 @@
 				<filter folders="1" files="1"/>
 				<path name="tw_file_location1" default="/"/>
 				<data name="tw_filename1"/>
-				<selection name="tw_selection1"/>
+				<selection name="tw_selection1" multiple="true"/>
 			</fileselector>
 
 			<template name="ab_ex"/>
@@ -9083,7 +8956,11 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<actions>
+				<action function="set">rw_filemanager_cleanup_render=1</action>
+				<action function="set">rw_filemanager_allow_selection=0</action>
+				<action function="home"/>
+				</actions>
 			</button>
 
 			<text style="text_ab_title">
@@ -9128,12 +9005,20 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<actions>
+				<action function="set">rw_filemanager_cleanup_render=1</action>
+				<action function="set">rw_filemanager_allow_selection=0</action>
+				<action function="home"/>
+				</actions>
 			</action>
 
 			<action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<actions>
+				<action function="set">rw_filemanager_cleanup_render=1</action>
+				<action function="set">rw_filemanager_allow_selection=0</action>
+				<action function="home"/>
+				</actions>
 			</action>
 
 			<action>
@@ -9142,8 +9027,59 @@
 					<action function="page">filemanageroptions</action>
 				</actions>
 			</action>
+			
+			<button>
+				<conditions>
+				<condition var1="rw_filemanager_hide_button" op="!=" var2="1"/>
+				<condition var1="tw_filemanager_command" op="!=" var2="rm -rf"/>
+				<condition var1="tw_filemanager_command" op="!=" var2="chmod"/>
+				<condition var1="rw_filemanager_allow_selection" var2="1"/>
+				</conditions>
+				<placement x="%btn_float_x%" y="%row7_3a_y%"/>
+				<image resource="btn_float_folder"/>
+				<highlight color="%highlight_color%"/>
+				<actions>
+					<action function="set">rw_filemanager_allow_selection=0</action>
+					<action function="page">choosedestinationfolder</action>
+				</actions>
+			</button>
+			
+			<button>
+				<conditions>
+				<condition var1="rw_filemanager_hide_button" op="!=" var2="1"/>
+				<condition var1="tw_filemanager_command" op="=" var2="chmod"/>
+				</conditions>
+				<placement x="%btn_float_x%" y="%row7_3a_y%"/>
+				<image resource="btn_float_folder"/>
+				<highlight color="%highlight_color%"/>
+				<actions>
+					<action function="set">rw_filemanager_allow_selection=0</action>
+					<action function="set">tw_filemanager_rename=0000</action>
+					<action function="set">tw_fm_text2=</action>
+					<action function="set">tw_fm_text3=</action>
+					<action function="set">tw_include_text3=0</action>
+					<action function="set">tw_back=filemanageroptions</action>
+					<action function="page">filemanagerchmod</action>
+				</actions>
+			</button>
+			
+			<button>
+				<conditions>
+				<condition var1="rw_filemanager_hide_button" op="!=" var2="1"/>
+				<condition var1="tw_filemanager_command" op="=" var2="rm -rf"/>
+				<condition var1="rw_filemanager_allow_selection" var2="1"/>
+				</conditions>
+				<placement x="%btn_float_x%" y="%row7_3a_y%"/>
+				<image resource="btn_float_folder"/>
+				<highlight color="%highlight_color%"/>
+				<actions>
+					<action function="set">rw_filemanager_allow_selection=0</action>
+					<action function="page">filemanagerconfirm</action>
+				</actions>
+			</button>
 
 			<button>
+				<condition var1="rw_filemanager_allow_selection" var2="0"/>
 				<placement x="%btn_float_x%" y="%row7_3a_y%"/>
 				<image resource="btn_float_folder"/>
 				<highlight color="%highlight_color%"/>
@@ -9155,7 +9091,7 @@
 				</actions>
 			</button>
 		</page>
-
+		
 		<page name="filemanageroptions">
 			<template name="body"/>
 
@@ -9166,7 +9102,7 @@
 				<filter folders="1" files="1"/>
 				<path name="tw_file_location1" default="/"/>
 				<!--data name="tw_filename1" /-->
-				<selection name="tw_selection1"/>
+				<selection name="tw_selection1" multiple="true"/>
 			</fileselector>
 
 			<fileselector style="fileselector_s">
@@ -9176,7 +9112,7 @@
 				<icon folder="folder_icon" file="file_icon"/>
 				<path name="tw_file_location1" default="/"/>
 				<!--data name="tw_filename1" /-->
-				<selection name="tw_selection1"/>
+				<selection name="tw_selection1" multiple="true"/>
 			</fileselector>
 
 			<button>
@@ -9198,7 +9134,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -9263,8 +9199,9 @@
 				<placement x="%col1_x%" y="%bs_row1_y%" w="%content_w%" h="%ab_menu_sort_btn_h%"/>
 				<actions>
 					<action function="set">tw_filemanager_command=cp</action>
-					<action function="set">tw_fm_text1={@fm_copying=Copying}</action>
-					<action function="page">choosedestinationfolder</action>
+					<action function="set">tw_fm_text1={@fm_copying_from=Copying files/folders from}</action>
+					<action function="set">rw_filemanager_allow_selection=1</action>
+					<action function="page">filemanagerlist</action>
 				</actions>
 			</button>
 
@@ -9272,7 +9209,8 @@
 				<condition var1="tw_fm_isfolder" var2="1"/>
 				<placement x="%col1_x%" y="%bs_row1_y%" w="%content_w%" h="%ab_menu_sort_btn_h%"/>
 				<actions>
-					<action function="set">tw_filemanager_command=cd "%tw_file_location1%" &amp;&amp; cd .. &amp;&amp; cp -R</action>
+					<action function="set">rw_filemanager_allow_selection=0</action>
+					<action function="set">tw_filemanager_command=cp -R "%tw_file_location1%"</action>
 					<action function="set">tw_fm_text1={@fm_copying=Copying}</action>
 					<action function="page">choosedestinationfolder</action>
 				</actions>
@@ -9293,7 +9231,8 @@
 				<actions>
 					<action function="set">tw_filemanager_command=mv</action>
 					<action function="set">tw_fm_text1={@fm_moving=Moving}</action>
-					<action function="page">choosedestinationfolder</action>
+					<action function="set">rw_filemanager_allow_selection=1</action>
+					<action function="page">filemanagerlist</action>
 				</actions>
 			</button>
 
@@ -9311,6 +9250,7 @@
 				<condition var1="tw_fm_isfolder" var2="0"/>
 				<placement x="%col1_x%" y="%bs_row3_y%" w="%content_w%" h="%ab_menu_sort_btn_h%"/>
 				<actions>
+					<action function="set">rw_filemanager_allow_selection=1</action>
 					<action function="set">tw_filemanager_rename=tw_selection1</action>
 					<action function="set">tw_fm_text1={@fm_renaming=Renaming}</action>
 					<action function="set">tw_filemanager_command=mv</action>
@@ -9322,6 +9262,7 @@
 				<condition var1="tw_fm_isfolder" var2="1"/>
 				<placement x="%col1_x%" y="%bs_row3_y%" w="%content_w%" h="%ab_menu_sort_btn_h%"/>
 				<actions>
+					<action function="set">rw_filemanager_allow_selection=0</action>
 					<action function="set">tw_filemanager_rename=tw_selection1</action>
 					<action function="set">tw_fm_text1={@fm_renaming=Renaming}</action>
 					<action function="set">tw_filemanager_command=cd "%tw_file_location1%" &amp;&amp; cd .. &amp;&amp; mv</action>
@@ -9347,8 +9288,8 @@
 					<action function="set">tw_fm_text2=</action>
 					<action function="set">tw_fm_text3=</action>
 					<action function="set">tw_include_text3=0</action>
-					<action function="set">tw_back=filemanageroptions</action>
-					<action function="page">filemanagerconfirm</action>
+					<action function="set">rw_filemanager_allow_selection=1</action>
+					<action function="page">filemanagerlist</action>
 				</actions>
 			</button>
 
@@ -9358,35 +9299,36 @@
 			</image>
 
 <text style="bs_text">
-	            <condition var1="tw_fm_isfolder" var2="1"/>
 				<placement x="%col1_x_indent%" y="%bs_row5_text_y%"/>
-				<text>{@fm_chmod755_btn=chmod 755}</text>
+				<text>{@fm_chmod_btn=chmod}</text>
 			</text>
 
 			<button style="bs_btn">
-				<condition var1="tw_fm_isfolder" var2="1"/>
 				<placement x="%col1_x%" y="%bs_row5_y%" w="%content_w%" h="%ab_menu_sort_btn_h%"/>
 				<actions>
-					<action function="set">tw_filemanager_command=chmod 755</action>
-					<action function="set">tw_fm_text1={@fm_chmod755ing=chmod 755}</action>
+					<action function="set">tw_filemanager_command=chmod</action>
 					<action function="set">tw_fm_text2=</action>
 					<action function="set">tw_fm_text3=</action>
 					<action function="set">tw_include_text3=0</action>
 					<action function="set">tw_back=filemanageroptions</action>
-					<action function="page">filemanagerconfirm</action>
+					<action function="set">rw_filemanager_allow_selection=1</action>
+					<action function="page">filemanagerlist</action>
 				</actions>
 			</button>
 
 			<text style="bs_text">
+				<condition var1="rw_multiple_list_type" var2="3"/>
 				<condition var1="tw_fm_isfolder" var2="0"/>
-				<placement x="%col1_x_indent%" y="%bs_row5_text_y%"/>
+				<placement x="%col1_x_indent%" y="%bs_row6_text_y%"/>
 				<text>{@wolf_fm_unzip_btn=Unzip}</text>
 			</text>
 
 			<button style="bs_btn">
+				<condition var1="rw_multiple_list_type" var2="3"/>
 				<condition var1="tw_fm_isfolder" var2="0"/>
-				<placement x="%col1_x%" y="%bs_row5_y%" w="%content_w%" h="%ab_menu_sort_btn_h%"/>
+				<placement x="%col1_x%" y="%bs_row6_y%" w="%content_w%" h="%ab_menu_sort_btn_h%"/>
 				<actions>
+					<action function="set">rw_filemanager_allow_selection=0</action>
 					<action function="set">tw_filemanager_command=unzip -o</action>
 					<action function="set">tw_fm_text1={@wolf_fm_unzip_btn=Unzip}</action>
 					<action function="set">tw_fm_text2=</action>
@@ -9397,87 +9339,64 @@
 				</actions>
 			</button>
 
-            <image>
+			<image>
+				<condition var1="rw_multiple_list_type" var2="3"/>
 				<placement x="%col1_x%" y="%bs_row6_y%"/>
 				<image resource="bs_btn_chmod"/>
 			</image>
-
-			<text style="bs_text">
-				<placement x="%col1_x_indent%" y="%bs_row6_text_y%"/>
-				<text>{@fm_chmod644_btn=chmod 644}</text>
-			</text>
-
-			<button style="bs_btn">
-				<placement x="%col1_x%" y="%bs_row6_y%" w="%content_w%" h="%ab_menu_sort_btn_h%"/>
-				<actions>
-					<action function="set">tw_filemanager_command=chmod 644</action>
-					<action function="set">tw_fm_text1={@fm_chmod644ing=chmod 644}</action>
-					<action function="set">tw_fm_text2=</action>
-					<action function="set">tw_fm_text3=</action>
-					<action function="set">tw_include_text3=0</action>
-					<action function="set">tw_back=filemanageroptions</action>
-					<action function="page">filemanagerconfirm</action>
-				</actions>
-			</button>
-
-			<image>
-				<placement x="%col1_x%" y="%bs_row7_y%"/>
-				<image resource="bs_btn_chmod"/>
-			</image>
-
-			<text style="bs_text">
-				<placement x="%col1_x_indent%" y="%bs_row7_text_y%"/>
-				<text>{@fm_chmod_btn=chmod}</text>
-			</text>
-
-			<button style="bs_btn">
-				<placement x="%col1_x%" y="%bs_row7_y%" w="%content_w%" h="%ab_menu_sort_btn_h%"/>
-				<actions>
-					<action function="set">tw_filemanager_rename=0000</action>
-					<action function="set">tw_fm_text2=</action>
-					<action function="set">tw_fm_text3=</action>
-					<action function="set">tw_include_text3=0</action>
-					<action function="set">tw_back=filemanageroptions</action>
-					<action function="page">filemanagerchmod</action>
-				</actions>
-			</button>
 
 			<button>
 				<placement x="%ab_btn1_x%" y="%row3_1_y%"/>
 				<image resource="bs_close"/>
 				<highlight color="%highlight_color%"/>
+			 <actions>
+				<action function="set">rw_filemanager_cleanup_render=1</action>
+				<action function="set">rw_filemanager_allow_selection=0</action>
 				<action function="page">filemanagerlist</action>
+			  </actions>
 			</button>
 
 			<button>
 				<condition var1="tw_busy" var2="0"/>
 				<placement x="%center_x%" y="%row_navbtn_y%" placement="4"/>
 				<image resource="home" highlightresource="home_hl"/>
+			 <actions>
+				<action function="set">rw_filemanager_cleanup_render=1</action>
+				<action function="set">rw_filemanager_allow_selection=0</action>
 				<action function="page">filemanagerlist</action>
+			  </actions>
 			</button>
 
 			<button>
 				<condition var1="tw_busy" var2="0"/>
 				<placement x="%back_button_x%" y="%row_navbtn_y%" placement="4"/>
 				<image resource="back" highlightresource="back_hl"/>
+			  <actions>
+				<action function="set">rw_filemanager_cleanup_render=1</action>
+				<action function="set">rw_filemanager_allow_selection=0</action>
 				<action function="page">filemanagerlist</action>
+			  </actions>
 			</button>
 
 			<button>
 				<condition var1="tw_busy" var2="0"/>
 				<placement x="%slideout_button_x%" y="%row_navbtn_y%" placement="4"/>
 				<image resource="slideout" highlightresource="slideout_hl"/>
+		     <actions>
+				<action function="set">rw_filemanager_cleanup_render=1</action>
+				<action function="set">rw_filemanager_allow_selection=0</action>
 				<action function="page">filemanagerlist</action>
+			  </actions>
 			</button>
 
 			<action>
 				<touch key="power+volup"/>
-				<action function="screenshotexternal"/>
+				<action function="screenshot"/>
 			</action>
 			
 			<action>
 				<touch key="power+voldown"/>
-				<action function="screenshotinternal"/>
+				<action function="screenshot"/>
 			</action>
 		</page>
 
@@ -9517,7 +9436,11 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<actions>
+				<action function="set">rw_filemanager_cleanup_render=1</action>
+				<action function="set">rw_filemanager_allow_selection=0</action>
+				<action function="home"/>
+				</actions>
 			</button>
 
 			<text style="text_ab_title">
@@ -9568,7 +9491,11 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<actions>
+				<action function="set">rw_filemanager_cleanup_render=1</action>
+				<action function="set">rw_filemanager_allow_selection=0</action>
+				<action function="home"/>
+				</actions>
 			</action>
 
 			<action>
@@ -9587,7 +9514,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -9641,7 +9568,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -9660,7 +9587,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -9714,7 +9641,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -9733,7 +9660,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -9786,7 +9713,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -9805,7 +9732,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -9824,6 +9751,13 @@
 			</text>
 
 			<text style="text_body2_hl">
+				<condition var1="tw_fm_isfolder" var2="0"/>
+				<placement x="%col1_x%" y="%row3_1_y%"/>
+				<text>%tw_file_location1%</text>
+			</text>
+
+			<text style="text_body2_hl">
+				<condition var1="tw_fm_isfolder" var2="1"/>
 				<placement x="%col1_x%" y="%row3_1_y%"/>
 				<text>%tw_filename1%</text>
 			</text>
@@ -9854,7 +9788,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 		</page>
 
@@ -9906,27 +9840,67 @@
 					<action function="page">filemanagercomplete</action>
 				</actions>
 			</action>
-
+			
+			
 			<action>
-				<condition var1="tw_include_text3" var2="0"/>
+				<condition var1="tw_filemanager_command" op="=" var2="cp"/>
 				<actions>
-					<action function="cmd">%tw_filemanager_command% "%tw_filename1%"</action>
+					<action function="cmd">for i in %rw_multiple_dir_list%; do cp -r $i %tw_fm_text3%;done;for i in %rw_multiple_file_list%; do cp -f $i %tw_fm_text3%;done</action>
 				</actions>
 			</action>
 			
-<action>
+			<action>
 				<condition var1="tw_filemanager_command" op="=" var2="unzip -o"/>
-				<condition var1="tw_include_text3" var2="1"/>
 				<actions>
 					<action function="cmd">%tw_filemanager_command% "%tw_filename1%" -d "%tw_fm_text3%"</action>
 				</actions>
 			</action>
+			
+			<action>
+				<condition var1="tw_fm_text1" op="=" var2="{@fm_moving=Moving}"/>
+				<actions>
+					<action function="cmd">for i in %rw_multiple_dir_list%; do mv -f $i %tw_fm_text3%;done; for i in %rw_multiple_file_list%; do mv -f $i %tw_fm_text3%;done</action>
+				</actions>
+			</action>
+			
+			<action>
+				<condition var1="tw_fm_text1" op="=" var2="{@fm_renaming=Renaming}"/>
+				<actions>
+					<action function="cmd">mv "%tw_filename1%" %tw_fm_text3%</action>
+				</actions>
+			</action>
+			
+	
+		    <action>
+			    <condition var1="tw_filemanager_command" op="=" var2="rm -rf"/>
+				<actions>
+					<action function="cmd">for i in %rw_multiple_dir_list%; do rm -r $i;done;for i in %rw_multiple_file_list%; do rm -f $i;done</action>
+				</actions>
+			</action>
+			
+			<action>
+				<conditions>
+				<condition var1="tw_filemanager_command" op="!=" var2="rm -rf"/>
+				<condition var1="tw_filemanager_command" op="!=" var2="mv"/>
+				<condition var1="tw_filemanager_command" op="!=" var2="unzip -o"/>
+				<condition var1="tw_filemanager_command" op="!=" var2="cp"/>
+				<condition var1="rw_filemanager_allow_selection" var2="1"/>
+				</conditions>
+				<actions>
+					<action function="cmd">for i in %rw_multiple_dir_list%; do %tw_filemanager_command% $i;done;for i in %rw_multiple_file_list%; do %tw_filemanager_command% $i;done</action>
+				</actions>
+			</action>
 
 			<action>
+				<conditions>
+				<condition var1="tw_filemanager_command" op="!=" var2="rm -rf"/>
+				<condition var1="tw_filemanager_command" op="!=" var2="mv"/>
 				<condition var1="tw_filemanager_command" op="!=" var2="unzip -o"/>
-				<condition var1="tw_include_text3" var2="1"/>
+				<condition var1="tw_filemanager_command" op="!=" var2="cp"/>
+				<condition var1="rw_filemanager_allow_selection" var2="0"/>
+				</conditions>
 				<actions>
-					<action function="cmd">%tw_filemanager_command% "%tw_filename1%" "%tw_fm_text3%"</action>
+					<action function="cmd">%tw_filemanager_command% "%tw_fm_text3%"</action>
 				</actions>
 			</action>
 		</page>
@@ -9942,6 +9916,8 @@
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
 				<actions>
+					<action function="set">rw_filemanager_allow_selection=0</action>
+					<action function="set">rw_filemanager_cleanup_render=1</action>
 					<action function="set">tw_clear_destination=main2</action>
 					<action function="page">clear_vars</action>
 				</actions>
@@ -9975,6 +9951,8 @@
 				<placement x="%btn_raised_left_x%" y="%row8_1_y%"/>
 				<text>{@back_btn=BACK}</text>
 				<actions>
+					<action function="set">rw_filemanager_allow_selection=0</action>
+					<action function="set">rw_filemanager_cleanup_render=1</action>
 					<action function="set">tw_clear_destination=%tw_back%</action>
 					<action function="page">clear_vars</action>
 				</actions>
@@ -9984,6 +9962,8 @@
 				<placement x="%btn_raised_right_x%" y="%row8_1_y%" placement="1"/>
 				<text>{@reboot_system_btn=REBOOT SYSTEM}</text>
 				<actions>
+					<action function="set">rw_filemanager_allow_selection=0</action>
+					<action function="set">rw_filemanager_cleanup_render=1</action>
 					<action function="set">tw_back=main2</action>
 					<action function="page">reboot_system_routine</action>
 				</actions>
@@ -9992,6 +9972,8 @@
 			<action>
 				<touch key="home"/>
 				<actions>
+					<action function="set">rw_filemanager_allow_selection=0</action>
+					<action function="set">rw_filemanager_cleanup_render=1</action>
 					<action function="set">tw_clear_destination=main2</action>
 					<action function="page">clear_vars</action>
 				</actions>
@@ -10000,6 +9982,8 @@
 			<action>
 				<touch key="back"/>
 				<actions>
+					<action function="set">rw_filemanager_allow_selection=0</action>
+					<action function="set">rw_filemanager_cleanup_render=1</action>
 					<action function="set">tw_clear_destination=%tw_back%</action>
 					<action function="page">clear_vars</action>
 				</actions>
@@ -10017,7 +10001,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -10079,7 +10063,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -10116,7 +10100,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -10227,7 +10211,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -10249,7 +10233,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -10321,7 +10305,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -10340,7 +10324,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -10406,7 +10390,7 @@
 				<touch key="home"/>
 				<actions>
 					<action function="set">tw_hide_kb=0</action>
-					<action function="page">main</action>
+					<action function="home"/>
 				</actions>
 			</action>
 
@@ -10420,12 +10404,12 @@
 
 			<action>
 				<touch key="power+volup"/>
-				<action function="screenshotexternal"/>
+				<action function="screenshot"/>
 			</action>
 
 <action>
 				<touch key="power+voldown"/>
-				<action function="screenshotinternal"/>
+				<action function="screenshot"/>
 			</action>
 		</page>
 
@@ -10439,7 +10423,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -10490,7 +10474,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -10509,7 +10493,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -10561,7 +10545,7 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<action>
@@ -10612,10 +10596,7 @@
 				<dimensions lineh="%slidervalue_lineh%" linepadding="%slidervalue_padding%" sliderw="%slidervalue_sliderw%" sliderh="%slidervalue_sliderh%"/>
 				<data variable="tw_brightness_pct" min="10" max="100" showrange="0" showcurr="0" changeondrag="1"/>
 				<actions>
-					<action function="set">tw_brightness=%tw_brightness_max%</action>
-					<action function="compute">tw_brightness*%tw_brightness_pct%</action>
-					<action function="compute">tw_brightness/100</action>
-					<action function="setbrightness">%tw_brightness%</action>
+					<action function="setbrightness">%tw_brightness_pct%</action>
 				</actions>
 			</slidervalue>
 			
@@ -10683,12 +10664,12 @@
 
 			<action>
 				<touch key="power+volup"/>
-				<action function="screenshotexternal"/>
+				<action function="screenshot"/>
 			</action>
 
 <action>
 				<touch key="power+voldown"/>
-				<action function="screenshotinternal"/>
+				<action function="screenshot"/>
 			</action>
 		</page>
 
@@ -10702,7 +10683,7 @@
 			<button>
 				<placement x="%ab_back_x%" y="%ab_y%"/>
 				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</button>
 
 			<text style="text_ab_title">
@@ -10802,13 +10783,13 @@
 
 			<action>
 				<touch key="home"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 
 			<action>
 				<touch key="back"/>
-				<action function="page">main</action>
+				<action function="home"/>
 			</action>
 
 			<button>
@@ -10860,12 +10841,12 @@
 
 			<action>
 				<touch key="power+volup"/>
-				<action function="screenshotexternal"/>
+				<action function="screenshot"/>
 			</action>
 
 <action>
 				<touch key="power+voldown"/>
-				<action function="screenshotinternal"/>
+				<action function="screenshot"/>
 			</action>
 			</page>
 
@@ -11065,12 +11046,12 @@
 
 			<action>
 				<touch key="power+volup"/>
-				<action function="screenshotexternal"/>
+				<action function="screenshot"/>
 			</action>
 
 <action>
 				<touch key="power+voldown"/>
-				<action function="screenshotinternal"/>
+				<action function="screenshot"/>
 			</action>
 		</page>
 
@@ -11100,7 +11081,7 @@
 					<action function="set">tw_action_text1=</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_action_param=</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action2=</action>
 					<action function="set">tw_action2_param=</action>
 					<action function="set">tw_has_cancel=0</action>
@@ -11125,7 +11106,7 @@
 					<action function="set">tw_action_text1=</action>
 					<action function="set">tw_action_text2=</action>
 					<action function="set">tw_action_param=</action>
-					<action function="set">tw_has_action2=0</action>
+					<action function="clear">tw_has_action2</action>
 					<action function="set">tw_action2=</action>
 					<action function="set">tw_action2_param=</action>
 					<action function="set">tw_has_cancel=0</action>
@@ -11145,12 +11126,12 @@
 
 			<action>
 				<touch key="power+volup"/>
-				<action function="screenshotexternal"/>
+				<action function="screenshot"/>
 			</action>
 
 <action>
 				<touch key="power+voldown"/>
-				<action function="screenshotinternal"/>
+				<action function="screenshot"/>
 			</action>
 		</page>
 
@@ -11255,12 +11236,12 @@
 
 			<action>
 				<touch key="power+volup"/>
-				<action function="screenshotexternal"/>
+				<action function="screenshot"/>
 			</action>
 
 <action>
 				<touch key="power+voldown"/>
-				<action function="screenshotinternal"/>
+				<action function="screenshot"/>
 			</action>
 		</page>
 	</pages>

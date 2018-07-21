@@ -42,6 +42,7 @@ extern "C" {
 #include "twcommon.h"
 #include "twrp-functions.hpp"
 #include "data.hpp"
+#include "dumwolf.hpp"
 #include "partitions.hpp"
 #include "openrecoveryscript.hpp"
 #include "variables.h"
@@ -117,6 +118,8 @@ int main(int argc, char **argv) {
 	gui_init();
 	printf("=> Linking mtab\n");
 	symlink("/proc/mounts", "/etc/mtab");
+	if (!TWFunc::Path_Exists("/sbin/wlfs"))
+	property_set("sys.usb.recovery_lock", "0");
 	std::string fstab_filename = "/etc/twrp.fstab";
 	if (!TWFunc::Path_Exists(fstab_filename)) {
 		fstab_filename = "/etc/recovery.fstab";
@@ -167,11 +170,11 @@ int main(int argc, char **argv) {
           	gui_msg("full_selinux=Full SELinux support is present.");
 			}
 	}
-            gui_print("**************************");
+            gui_print("**************************\n");
 		    gui_msg("redwolfms2=[Red Wolf]: Welcome! ^_^");
 		    gui_msg(Msg("redwolfms3=[Version]: '{1}'")(RW_VERSION));
 		    gui_msg(Msg("redwolfms4=[Build]: {1}")(RW_BUILD));
-		    gui_print("**************************");
+		    gui_print("**************************\n");
 	        PartitionManager.Mount_By_Path("/cache", false);
 
 	bool Shutdown = false;
@@ -257,21 +260,13 @@ int main(int argc, char **argv) {
 	if (crash_counter == 0) {
 		property_list(Print_Prop, NULL);
 		printf("\n");
-		char fingerprint[PROPERTY_VALUE_MAX];
-        property_get("ro.build.fingerprint", fingerprint, "");
-        std::string fpstr = fingerprint;
-        if (!fpstr.empty()) {
-        usleep(2000000);
-        TWFunc::tw_reboot(rb_recovery);
-        usleep(5000000);
-         }
 	} else {
 		printf("twrp.crash_counter=%d\n", crash_counter);
 	}
 
 	// Check for and run startup script if script exists
-	// TWFunc::check_and_run_script("/sbin/runatboot.sh", "boot");
-	// TWFunc::check_and_run_script("/sbin/postrecoveryboot.sh", "boot"); 
+	TWFunc::check_and_run_script("/sbin/runatboot.sh", "boot");
+	TWFunc::check_and_run_script("/sbin/postrecoveryboot.sh", "boot"); 
 
 #ifdef TW_INCLUDE_INJECTTWRP
 	// Back up TWRP Ramdisk if needed:
@@ -382,6 +377,8 @@ int main(int argc, char **argv) {
 	// Launch the main GUI
 	gui_start();
 
+    if (DataManager::GetIntValue("rw_dumwolf_call") == 0)
+    RWDumwolf::Deactivation_Process();
 	TWFunc::Disable_Stock_Recovery_Replace();
 	TWFunc::Update_Intent_File(Send_Intent);
 	delete adb_bu_fifo;

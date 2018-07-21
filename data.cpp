@@ -35,7 +35,6 @@
 #include "find_file.hpp"
 #include "set_metadata.h"
 #include "gui/gui.hpp"
-#include "dumwolf.hpp"
 #include "infomanager.hpp"
 
 #define DEVID_MAX 64
@@ -309,6 +308,7 @@ int DataManager::Flush()
 
 int DataManager::SaveValues()
 {
+#ifndef TW_OEM_BUILD
 	if (PartitionManager.Mount_By_Path("/persist", false)) {
 		mPersist.SetFile(PERSIST_SETTINGS_FILE);
 		mPersist.SetFileVersion(FILE_VERSION);
@@ -321,16 +321,18 @@ int DataManager::SaveValues()
 	if (mBackingFile.empty())
 		return -1;
 
-    if (RWDumwolf::Unpack_Image("/recovery")) {
-    mBackingFile = "/tmp/dumwolf/ramdisk/sbin/redwolf";
+	string mount_path = GetSettingsStoragePath();
+	PartitionManager.Mount_By_Path(mount_path.c_str(), 1);
+
 	mPersist.SetFile(mBackingFile);
 	mPersist.SetFileVersion(FILE_VERSION);
 	pthread_mutex_lock(&m_valuesLock);
 	mPersist.SaveValues();
 	pthread_mutex_unlock(&m_valuesLock);
-    chmod(mBackingFile.c_str(), 0640);  
-    RWDumwolf::Repack_Image("/recovery");
-    }
+
+	tw_set_default_metadata(mBackingFile.c_str());
+	LOGINFO("Saved settings file values to '%s'\n", mBackingFile.c_str());
+#endif // ifdef TW_OEM_BUILD
 	return 0;
 }
 
@@ -523,7 +525,7 @@ void DataManager::SetBackupFolder()
 {
 	string str = GetCurrentStoragePath();
 	TWPartition* partition = PartitionManager.Find_Partition_By_Path(str);
-	str += "/WOLF/.BACKUPS/";
+	str += "/WOLF/.BACKUPS/PARTITIONS/";
 	string dev_id;
 	GetValue("device_id", dev_id);
 
@@ -575,10 +577,13 @@ void DataManager::SetDefaultValues()
 
 	mConst.SetValue(TW_VERSION_VAR, RW_VERSION);	
 	TWPartition *store = PartitionManager.Get_Default_Storage_Partition();
-	if (store)
+	if (store) {
 		mPersist.SetValue("tw_storage_path", store->Storage_Path);
-	else
+		mPersist.SetValue("rw_ose_path", store->Storage_Path);
+	} else {
+		mPersist.SetValue("rw_ose_path", "/");
 		mPersist.SetValue("tw_storage_path", "/");
+   }
 
 #ifdef TW_FORCE_CPUINFO_FOR_DEVICE_ID
 	printf("TW_FORCE_CPUINFO_FOR_DEVICE_ID := true\n");
@@ -600,7 +605,7 @@ void DataManager::SetDefaultValues()
 
 	str = GetCurrentStoragePath();
 	mPersist.SetValue(TW_ZIP_LOCATION_VAR, str);
-	str += "/WOLF/.BACKUPS/";
+	str += "/WOLF/.BACKUPS/PARTITIONS/";
 
 	string dev_id;
 	mConst.GetValue("device_id", dev_id);
@@ -710,8 +715,10 @@ void DataManager::SetDefaultValues()
 #endif
 
 #ifdef TW_HAS_NO_BOOT_PARTITION
+    mPersist.SetValue("rw_ose_list", "/system;");
 	mPersist.SetValue("tw_backup_list", "/system;/data;");
 #else
+    mPersist.SetValue("rw_ose_list", "/system;/boot;");
 	mPersist.SetValue("tw_backup_list", "/system;/data;/boot;");
 #endif
 	mConst.SetValue(TW_MIN_SYSTEM_VAR, TW_MIN_SYSTEM_SIZE);
@@ -722,12 +729,12 @@ void DataManager::SetDefaultValues()
      mData.SetValue(RW_RUN_SURVIVAL_BACKUP, "0");
 	 mData.SetValue(RW_PASSWORD_VARIABLE, "dd");
      mData.SetValue(RW_FLASHLIGHT_VAR, "0");
-     
-	 mPersist.SetValue(RW_USER_IS_PIRATE, "0");
-     mPersist.SetValue(RW_DISABLE_BOOT_CHK, "0");
-     mPersist.SetValue(RW_DO_SYSTEM_ON_OTA, "1");
+     mData.SetValue("rw_multiple_list_type", "0");
+     mData.SetValue("rw_filemanager_allow_selection", "0");
+	 
+	 mPersist.SetValue("wolf_ose_force_zip_entry", "1");
+	 mPersist.SetValue("wolf_ors_allow_reboot", "1");
 	 mPersist.SetValue("wolf_verify_incremental_ota_signature", "1");
-     mPersist.SetValue(RW_ADVANCED_STOCK_REPLACE, "1");
      mPersist.SetValue(RW_DISABLE_MOCK_LOCATION, "0");  
      mPersist.SetValue(RW_ENABLE_MOCK_LOCATION, "0");  
      mPersist.SetValue(RW_DISABLE_ADB_RO, "0");
@@ -735,9 +742,7 @@ void DataManager::SetDefaultValues()
      mPersist.SetValue(RW_ENABLE_SECURE_RO, "0");  
      mPersist.SetValue(RW_DISABLE_SECURE_RO, "0");  
      mPersist.SetValue(RW_DONT_REPLACE_STOCK, "0");
-     mPersist.SetValue(RW_ADVANCED_WARN_CHK, "0");       
      mPersist.SetValue(RW_INCREMENTAL_PACKAGE, "0");    
-     mPersist.SetValue(RW_SAVE_LOAD_AROMAFM, "0");
      mPersist.SetValue(RW_DISABLE_DEBUGGING, "0"); 
      mPersist.SetValue(RW_ENABLE_DEBUGGING, "1");     
      mPersist.SetValue(RW_DISABLE_FORCED_ENCRYPTION, "1");  
@@ -748,11 +753,8 @@ void DataManager::SetDefaultValues()
      mPersist.SetValue(RW_RESTORE_VIBRATE, "150");     
      mPersist.SetValue("wolf_data_boot_vibrate", "150");
      mPersist.SetValue(RW_T2W_CHECK, "0");
-     mPersist.SetValue(RW_MAIN_SURVIVAL_TRIGGER, "META-INF/com/miui/miui_update");
-      
-	 mConst.SetValue(RW_SURVIVAL_FOLDER_VAR, "/sdcard/WOLF");
-     mConst.SetValue(RW_SURVIVAL_BACKUP_NAME, "OTA");
-     mConst.SetValue(RW_ACTUAL_BUILD_VAR, RW_BUILD);
+     mPersist.SetValue(RW_MAIN_SURVIVAL_TRIGGER, "META-INF/com/miui/miui_update");      
+	  mConst.SetValue(RW_ACTUAL_BUILD_VAR, RW_BUILD);
      
      // End of the RedWolf variables
 
@@ -1054,7 +1056,7 @@ void DataManager::Output_Version(void)
 	char version[255];
 
 	if (!PartitionManager.Mount_By_Path("/cache", false)) {
-		LOGINFO("Unable to mount '%s' to write version number.\n", Path.c_str());
+		LOGINFO("Unable to mount '/cache' to write version number.\n");
 		return;
 	}
 	if (!TWFunc::Path_Exists("/cache/recovery/.")) {
@@ -1085,8 +1087,36 @@ void DataManager::Output_Version(void)
 
 void DataManager::ReadSettingsFile(void)
 {
-    LoadValues("/sbin/redwolf");
+#ifndef TW_OEM_BUILD
+	// Load up the values for TWRP - Sleep to let the card be ready
+	char mkdir_path[255], settings_file[255];
+	int is_enc, has_data_media;
+
+	GetValue(TW_IS_ENCRYPTED, is_enc);
+	GetValue(TW_HAS_DATA_MEDIA, has_data_media);
+	if (is_enc == 1 && has_data_media == 1) {
+		LOGINFO("Cannot load settings -- encrypted.\n");
+		return;
+	}
+
+	memset(mkdir_path, 0, sizeof(mkdir_path));
+	memset(settings_file, 0, sizeof(settings_file));
+	sprintf(mkdir_path, "%s/WOLF", GetSettingsStoragePath().c_str());
+	sprintf(settings_file, "%s/.redwolf", mkdir_path);
+
+	if (!PartitionManager.Mount_Settings_Storage(false))
+	{
+		usleep(500000);
+		if (!PartitionManager.Mount_Settings_Storage(false))
+			gui_msg(Msg(msg::kError, "unable_to_mount=Unable to mount {1}")(settings_file));
+	}
+
+	mkdir(mkdir_path, 0777);
+
+	LOGINFO("Attempt to load settings from settings file...\n");
+	LoadValues(settings_file);
 	Output_Version();
+#endif // ifdef TW_OEM_BUILD
 	PartitionManager.Mount_All_Storage();
 	update_tz_environment_variables();
 	TWFunc::Set_Brightness(GetStrValue("tw_brightness"));
@@ -1095,6 +1125,11 @@ void DataManager::ReadSettingsFile(void)
 string DataManager::GetCurrentStoragePath(void)
 {
 	return GetStrValue("tw_storage_path");
+}
+
+string DataManager::GetOseStoragePath(void)
+{
+	return GetStrValue("rw_ose_path");
 }
 
 string DataManager::GetSettingsStoragePath(void)
@@ -1111,15 +1146,16 @@ void DataManager::Vibrate(const string& varName)
 	}
 }
 
-void DataManager::Leds(bool enable)
+void DataManager::Leds(const bool enable)
 {
-	std::string leds, bs, bsmax, time, blink, bsm;
 	struct stat st;
-	leds = "/sys/class/leds/green";
-	bs = leds + "/brightness";
-    time = leds + "/led_time";
-    blink = leds + "/blink";    
+	const std::string
+    leds = "/sys/class/leds/green",
+    bs = leds + "/brightness",
+    time = leds + "/led_time",
+    blink = leds + "/blink",
     bsmax = leds + "/max_brightness";
+    std::string bsm;
     if (!enable && stat(bs.c_str(), &st) == 0)
     TWFunc::write_to_file(bs, "0");
     else {

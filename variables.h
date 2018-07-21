@@ -204,6 +204,9 @@
 #define CUSTOM_LUN_FILE "/sys/class/android_usb/android0/f_mass_storage/lun%d/file"
 #endif
 
+#define RW_PASSWORD_FILE "/sbin/wlfs"
+#define TMP_INSTALL_STATUS "/tmp/recovery.last_status"
+
 // For OpenRecoveryScript
 #define SCRIPT_FILE_CACHE "/cache/recovery/openrecoveryscript"
 #define SCRIPT_FILE_TMP "/tmp/openrecoveryscript"

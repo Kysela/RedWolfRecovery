@@ -1,4 +1,7 @@
 /*
+    Copyright 2018 ATG Droid/Dadi11 RedWolf
+	This file is part of RWRP/RedWolf Recovery Project.
+	 
 	Copyright 2013 bigbiff/Dees_Troy TeamWin
 	This file is part of TWRP/TeamWin Recovery Project.
 
@@ -36,6 +39,7 @@
 
 #include <string>
 #include <sstream>
+#include <fstream>
 #include "../partitions.hpp"
 #include "../twrp-functions.hpp"
 #include "../dumwolf.hpp"
@@ -185,8 +189,7 @@ GUIAction::GUIAction(xml_node<>* node)
 		ADD_ACTION(generatebackupname);
 		ADD_ACTION(checkpartitionlist);
 		ADD_ACTION(getpartitiondetails);
-		ADD_ACTION(screenshotinternal);
-		ADD_ACTION(screenshotexternal);
+		ADD_ACTION(screenshot);
 		ADD_ACTION(setbrightness);
 		ADD_ACTION(fileexists);
 		ADD_ACTION(killterminal);
@@ -558,7 +561,6 @@ int GUIAction::key(std::string arg)
 
 int GUIAction::page(std::string arg)
 {
-	property_set("twrp.action_complete", "0");
 	std::string page_name = gui_parse_text(arg);
 	return gui_changePage(page_name);
 }
@@ -577,9 +579,7 @@ int GUIAction::reload(std::string arg __unused)
 
 int GUIAction::readBackup(std::string arg __unused)
 {
-	string Restore_Name;
-	DataManager::GetValue("tw_restore", Restore_Name);
-	PartitionManager.Set_Restore_Files(Restore_Name);
+	PartitionManager.Set_Restore_Files(DataManager::GetStrValue("tw_restore"));
 	return 0;
 }
 
@@ -642,7 +642,7 @@ int GUIAction::restoredefaultsettings(std::string arg __unused)
 		gui_msg("simulating=Simulating actions...");
 	else {
 		DataManager::ResetDefaults();
-		PartitionManager.Update_System_Details();
+		PartitionManager.Update_System_Details(false);
 		PartitionManager.Mount_Current_Storage(true);
 	}
 	operation_end(0);
@@ -945,7 +945,8 @@ int GUIAction::getpartitiondetails(std::string arg)
 	return 0;
 }
 
-int GUIAction::screenshotinternal(std::string arg __unused)
+		
+int GUIAction::screenshot(std::string arg __unused)
 {
 	time_t tm;
 	char path[256];
@@ -953,53 +954,11 @@ int GUIAction::screenshotinternal(std::string arg __unused)
 	uid_t uid = AID_MEDIA_RW;
 	gid_t gid = AID_MEDIA_RW;
 
-	const std::string storage = "/sdcard";
+	const std::string storage = DataManager::GetCurrentStoragePath();
 	if (PartitionManager.Is_Mounted_By_Path(storage)) {
-		snprintf(path, sizeof(path), "%s/WOLF.res/WOLF.images/", storage.c_str());
+		snprintf(path, sizeof(path), "%s/WOLF/Screenshots/", storage.c_str());
 	} else {
-		strcpy(path, "/sdcard/WOLF.res/WOLF.images/");
-	}
-
-	if (!TWFunc::Create_Dir_Recursive(path, 0775, uid, gid))
-		return 0;
-
-	tm = time(NULL);
-	path_len = strlen(path);
-
-	// Screenshot_2014-01-01-18-21-38.png
-	strftime(path+path_len, sizeof(path)-path_len, "Screenshot_%Y-%m-%d-%H-%M-%S.png", localtime(&tm));
-
-	int res = gr_save_screenshot(path);
-	if (res == 0) {
-		chmod(path, 0666);
-		chown(path, uid, gid);
-
-		gui_msg(Msg("screenshot_saved=Screenshot was saved to {1}")(path));
-
-		// blink to notify that the screenshow was taken
-		gr_color(255, 255, 255, 255);
-		gr_fill(0, 0, gr_fb_width(), gr_fb_height());
-		gr_flip();
-		gui_forceRender();
-	} else {
-		gui_err("screenshot_err=Failed to take a screenshot!");
-	}
-	return 0;
-}
-
-int GUIAction::screenshotexternal(std::string arg __unused)
-{
-	time_t tm;
-	char path[256];
-	int path_len;
-	uid_t uid = AID_MEDIA_RW;
-	gid_t gid = AID_MEDIA_RW;
-
-	const std::string storage = "/sdcard1";
-	if (PartitionManager.Is_Mounted_By_Path(storage)) {
-		snprintf(path, sizeof(path), "%s/WOLF.res/WOLF.images/", storage.c_str());
-	} else {
-		strcpy(path, "/sdcard/WOLF.res/WOLF.images/");
+		strcpy(path, "/tmp/WOLF/Screenshots/");
 	}
 
 	if (!TWFunc::Create_Dir_Recursive(path, 0775, uid, gid))
@@ -1028,7 +987,7 @@ int GUIAction::screenshotexternal(std::string arg __unused)
 	}
 	return 0;
 }
-
+	
 int GUIAction::setbrightness(std::string arg)
 {
 	return TWFunc::Set_Brightness(arg);
@@ -1083,6 +1042,7 @@ int GUIAction::flash(std::string arg)
 		DataManager::SetValue(TW_ZIP_INDEX, (i + 1));
 
 		TWFunc::SetPerformanceMode(true);
+		PartitionManager.Handle_Unofficial_Treble_Support();
 		ret_val = flash_zip(zip_path, &wipe_cache);
 		TWFunc::SetPerformanceMode(false);
 		if (ret_val != 0) {
@@ -1097,11 +1057,13 @@ int GUIAction::flash(std::string arg)
 		gui_msg("zip_wipe_cache=One or more zip requested a cache wipe -- Wiping cache now.");
 		PartitionManager.Wipe_By_Path("/cache");
 	}	   		  
+		 if (DataManager::GetIntValue("rw_dumwolf_call") == 0)
+	     DataManager::SetValue("rw_dumwolf_call", 1);
 		 RWDumwolf::Deactivation_Process();
 		 DataManager::Leds(true);
          DataManager::Vibrate("wolf_data_install_vibrate");		
          reinject_after_flash();
-	PartitionManager.Update_System_Details();
+	PartitionManager.Update_System_Details(false);
 	operation_end(ret_val);
 	// This needs to be after the operation_end call so we change pages before we change variables that we display on the screen
 	DataManager::SetValue(TW_ZIP_QUEUE_COUNT, zip_queue_index);
@@ -1224,7 +1186,7 @@ int GUIAction::wipe(std::string arg)
 		}
 #endif
 	}
-	PartitionManager.Update_System_Details();
+	PartitionManager.Update_System_Details(false);
 	if (ret_val)
 		ret_val = 0; // 0 is success
 	else
@@ -1239,7 +1201,7 @@ int GUIAction::refreshsizes(std::string arg __unused)
 	if (simulate) {
 		simulate_progress_bar();
 	} else
-		PartitionManager.Update_System_Details();
+		PartitionManager.Update_System_Details(false);
 	operation_end(0);
 	return 0;
 }
@@ -1626,7 +1588,10 @@ int GUIAction::adbsideload(std::string arg __unused)
 		}
 		property_set("ctl.start", "adbd");
 		TWFunc::Toggle_MTP(mtp_was_enabled);
-         DataManager::Leds(true);
+         if (DataManager::GetIntValue("rw_dumwolf_call") == 0)
+	     DataManager::SetValue("rw_dumwolf_call", 1);
+		 RWDumwolf::Deactivation_Process();
+		 DataManager::Leds(true);
          DataManager::Vibrate("wolf_data_install_vibrate");
 		 reinject_after_flash();
 		operation_end(ret);
@@ -1787,7 +1752,7 @@ int GUIAction::changefilesystem(std::string arg __unused)
 			op_status = 1; // fail
 		}
 	}
-	PartitionManager.Update_System_Details();
+	PartitionManager.Update_System_Details(false);
 	operation_end(op_status);
 	return 0;
 }
@@ -2125,32 +2090,13 @@ exit:
 
 int GUIAction::flashlight(std::string arg __unused)
  {
-	std::string path, one, zero, flashpath = "/sys/class/leds/led:torch_;/sys/class/leds/torch-light;";
-    struct stat st;
-    bool done = false;
-    size_t start_pos = 0, end_pos;
-    end_pos = flashpath.find(";", start_pos);
- 	while (end_pos != string::npos && start_pos < flashpath.size()) {
-	   if (done)
-	   break;        
- 	   path = flashpath.substr(start_pos, end_pos - start_pos);
-    	one = path + "1/brightness";
-        zero = path + "0/brightness";
-        if (stat(one.c_str(), &st) == 0 && stat(zero.c_str(), &st) == 0) {
-        done = true;
-        if (DataManager::GetIntValue("flashlight") == 0) {
-        TWFunc::write_to_file(one, "100");
-	    TWFunc::write_to_file(zero, "100");
-	    DataManager::SetValue("flashlight", 1);
-         } else {
-     TWFunc::write_to_file(one, "0");
-	 TWFunc::write_to_file(zero, "0");
-      DataManager::SetValue("flashlight", 0);
-      }
-  }
-     start_pos = end_pos + 1;
-     end_pos = flashpath.find(";", start_pos);
-   }
+ 	if (DataManager::GetIntValue("flashlight")) {
+ 	TWFunc::write_to_file("/sys/class/leds/flashlight/brightness", "0");
+     DataManager::SetValue("flashlight", "0");
+     } else {
+     TWFunc::write_to_file("/sys/class/leds/flashlight/brightness", "100");
+     DataManager::SetValue("flashlight", "1");
+     }
       return 0;
  }
 
@@ -2158,10 +2104,9 @@ int GUIAction::disableled(std::string arg __unused)
 {
  DataManager::Leds(false);
  return 0;  
- }
+} 
  
- 
- int GUIAction::removepassword(std::string arg __unused)
+int GUIAction::removepassword(std::string arg __unused)
  {
 	operation_start("Remove Recovery Password");
 	if (simulate) {
@@ -2169,11 +2114,13 @@ int GUIAction::disableled(std::string arg __unused)
          } else {
         std::string storage;
         gui_msg("wolf_remove_access_password_one=Removing recovery access password...");
-         if (!RWDumwolf::Unpack_Image("/recovery"))
+         if (!RWDumwolf::Unpack_Image("/recovery")) {
+         LOGERR("Unable to change password!\n");
          goto error;
+         }
 		storage = "/tmp/dumwolf/ramdisk/sbin";
 	    if (!TWFunc::Path_Exists(storage)) {
-		LOGERR("Failed to find sbin");
+		LOGERR("Failed to find sbin\n");
 			goto error;
 		}
 	    storage += "/wlfs";
@@ -2191,41 +2138,42 @@ int GUIAction::disableled(std::string arg __unused)
 	return 0;
 }
  
- int GUIAction::setpassword(std::string arg)
+ 
+
+		
+int GUIAction::setpassword(std::string arg)
 {
 	operation_start("Set New Recovery Password");
 	if (simulate) {
         simulate_progress_bar();
          } else {
          gui_msg("wolf_set_new_access_password=Changing recovery access password...");
-         std::string storage, renamed, setup, result;
-         if (!RWDumwolf::Unpack_Image("/recovery"))
+         std::string storage;
+         if (!RWDumwolf::Unpack_Image("/recovery")) {
+         LOGERR("Unable to change password!\n");
          goto error;
-		#ifndef TW_EXCLUDE_ENCRYPTED_BACKUPS
-		if (!TWFunc::Path_Exists("/sbin/openaes")) {
-		LOGERR("Unable to find openaes libraries!");
-		goto error;
-		}
-		#endif
+         }
 	    storage = "/tmp/dumwolf/ramdisk/sbin";
 	    if (!TWFunc::Path_Exists(storage)) {
 		LOGERR("Failed to find sbin");
-			goto error;
+		goto error;
 		}
 	    storage += "/wlfs";
-	    renamed = storage + ".bak";
-	    if (TWFunc::Path_Exists(renamed))
-	    unlink(renamed.c_str());
-		TWFunc::create_fingerprint_file(storage, arg);
+	    ofstream file;
+        file.open (storage.c_str());
+        file << arg << "\n";
+        file.close();
+        chmod(storage.c_str(), 0750);  
 		#ifndef TW_EXCLUDE_ENCRYPTED_BACKUPS
-		setup = "openaes enc --key " + arg + " --in " + storage + " --out " + renamed;
-		TWFunc::Exec_Cmd(setup, result);
+		std::string renamed = storage + ".bak", setup = "openaes enc --key " + arg + " --in " + storage + " --out " + renamed;
+		system(setup.c_str());
 		unlink(storage.c_str());
 		rename(renamed.c_str(), storage.c_str());
 		#endif
+		chmod(storage.c_str(), 0750);  
 		DataManager::SetValue(RW_PASSWORD_VARIABLE, arg);
 		if (!RWDumwolf::Repack_Image("/recovery")) {
-       LOGINFO("Unable to repack image\n");
+       LOGERR("Unable to repack image\n");
        goto error;
        }
 		gui_msg("update_part_details_done=...done");
@@ -2233,7 +2181,9 @@ int GUIAction::disableled(std::string arg __unused)
 	error:
 	operation_end(0);
 	return 0;
-}
+}		
+	    
+		
 	      
 
 int GUIAction::verifypassword(std::string arg __unused)
@@ -2247,35 +2197,43 @@ int GUIAction::verifypassword(std::string arg __unused)
 		usleep(1500000);
 		std::string storage;
 		storage = "/sbin/wlfs";
-		if (!TWFunc::Path_Exists(storage))
-		LOGERR("Unable to find password file");
+		if (!TWFunc::Path_Exists(storage)) {
+		LOGERR("Unable to find password file\n");
+		goto done;
+		}
 		#ifndef TW_EXCLUDE_ENCRYPTED_BACKUPS
-		if (TWFunc::Get_File_Type(storage) == 2) {
 		if (TWFunc::Try_Decrypting_File(storage, DataManager::GetStrValue("tw_droid_password"), false) != 1) {
 		op_status = 1;
 		gui_err("wolf_verify_password_fail=Password is not correct!");
 		usleep(1500000);
 		} else {
+		property_set("sys.usb.recovery_lock", "0");
 		gui_msg("wolf_verify_password_success=Password is correct!");
 		DataManager::SetValue(RW_PASSWORD_VARIABLE, DataManager::GetStrValue("tw_droid_password"));
 		usleep(1500000);
 		}
-		}
 		#else
 		std::string password;
-		if (TWFunc::read_file(storage, password) != 0)
-		LOGERR("Unable to read password file");
+		if (TWFunc::read_file(storage, password) != 0) {
+		LOGERR("Unable to read password file\n");
+		goto done;
+		}
 		if (password != DataManager::GetStrValue("tw_droid_password")) {
 		op_status = 1;
 		gui_err("wolf_verify_password_fail=Password is not correct!");
 		usleep(1500000);
 		} else {
+		property_set("sys.usb.recovery_lock", "0");
 		DataManager::SetValue(RW_PASSWORD_VARIABLE, DataManager::GetStrValue("tw_droid_password"));
 		gui_msg("wolf_verify_password_success=Password is correct!");
 		usleep(1500000);
 		}
 		#endif
 		}
+	done:
 	operation_end(op_status);
 	return 0;
 }
+
+   		
+		

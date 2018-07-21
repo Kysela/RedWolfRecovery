@@ -23,7 +23,7 @@
 #include <pthread.h>
 #include "infomanager.hpp"
 
-#define PERSIST_SETTINGS_FILE  "/persist/.wolfs"
+#define PERSIST_SETTINGS_FILE  "/persist/.redwolf"
 
 using namespace std;
 
@@ -64,6 +64,7 @@ public:
 
 	static string GetCurrentStoragePath(void);
 	static string GetSettingsStoragePath(void);
+	static string GetOseStoragePath(void);
 
 protected:
 	static string mBackingFile;

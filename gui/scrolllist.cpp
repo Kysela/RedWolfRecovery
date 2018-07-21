@@ -456,12 +456,11 @@ int GUIScrollList::NotifyTouch(TOUCH_STATE state, int x, int y)
 	case TOUCH_DRAG:
 		if (fastScroll)
 		{
-			int relY = y - mRenderY - mHeaderH; // touch position relative to window
 			int windowH = mRenderH - mHeaderH;
 			int totalHeight = GetItemCount() * actualItemHeight; // total height of the full list in pixels
 
 			// calculate new top position of the fastscroll bar relative to window
-			int newY = relY - mFastScrollRectTouchY;
+			int newY = y - mRenderY - mHeaderH - mFastScrollRectTouchY;
 			// keep it fully inside the list
 			newY = std::min(std::max(newY, 0), windowH - mFastScrollRectCurrentH);
 

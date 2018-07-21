@@ -1,4 +1,7 @@
 /*
+    Copyright 2018 ATG Droid/Dadi11 RedWolf
+	This file is part of RWRP/RedWolf Recovery Project.
+
 	Copyright 2013 bigbiff/Dees_Troy TeamWin
 	This file is part of TWRP/TeamWin Recovery Project.
 
@@ -289,7 +292,6 @@ protected:
 	void simulate_progress_bar(void);
 	int flash_zip(std::string filename, int* wipe_cache);
 	void reinject_after_flash();
-	void notify_after_install();
 	void operation_start(const string operation_name);
 	void operation_end(const int operation_status);
 	time_t Start;
@@ -325,8 +327,7 @@ protected:
 	int generatebackupname(std::string arg);
 	int checkpartitionlist(std::string arg);
 	int getpartitiondetails(std::string arg);
-	int screenshotinternal(std::string arg);
-	int screenshotexternal(std::string arg);
+	int screenshot(std::string arg);
 	int setbrightness(std::string arg);
 	int checkforapp(std::string arg);
 
@@ -568,6 +569,7 @@ protected:
 
 class GUIFileSelector : public GUIScrollList
 {
+friend class GUIAction;
 public:
 	GUIFileSelector(xml_node<>* node);
 	virtual ~GUIFileSelector();
@@ -575,7 +577,7 @@ public:
 public:
 	// Update - Update any UI component animations (called <= 30 FPS)
 	//  Return 0 if nothing to update, 1 on success and contiue, >1 if full render required, and <0 on error
-	virtual int Update(void);
+	virtual int Update(void);		
 
 	// NotifyVarChange - Notify of a variable change
 	virtual int NotifyVarChange(const std::string& varName, const std::string& value);
@@ -585,7 +587,7 @@ public:
 
 	virtual size_t GetItemCount();
 	virtual void RenderItem(size_t itemindex, int yPos, bool selected);
-	virtual void NotifySelect(size_t item_selected);
+	virtual void NotifySelect(size_t item_selected);	
 
 protected:
 	struct FileData {
@@ -601,24 +603,34 @@ protected:
 	};
 
 protected:
+    virtual int ObjectInFileList(const std::string& object, bool files);
 	virtual int GetFileList(const std::string folder);
 	static bool fileSort(FileData d1, FileData d2);
 
 protected:
 	std::vector<FileData> mFolderList;
 	std::vector<FileData> mFileList;
+	std::vector<std::string> mMultipleFileList;
+	std::vector<std::string> mMultipleDirList;
 	std::string mPathVar; // current path displayed, saved in the data manager
 	std::string mPathDefault; // default value for the path if none is set in mPathVar
 	std::string mExtn; // used for filtering the file list, for example, *.zip
 	std::string mVariable; // set when the user selects an item, pull path like /path/to/foo
 	std::string mSortVariable; // data manager variable used to change the sorting of files
 	std::string mSelection; // set when the user selects an item without the full path like selecting /path/to/foo would just be set to foo
+	std::string mFileManager;
 	int mShowFolders, mShowFiles; // indicates if the list should show folders and/or files
 	int mShowNavFolders; // indicates if the list should include the "up a level" item and allow you to traverse folders (nav folders are disabled for the restore list, for instance)
 	static int mSortOrder; // must be static because it is used by the static function fileSort
-	ImageResource* mFolderIcon;
-	ImageResource* mFileIcon;
+	int mSelectionList;
+	ImageResource* mFileSelectionIcon;
+	ImageResource* mFileUnSelectionIcon;
+	ImageResource* mDirSelectionIcon;
+	ImageResource* mDirUnSelectionIcon;
+	ImageResource* mZipSelectionIcon;
+	ImageResource* mZipUnSelectionIcon;
 	bool updateFileList;
+	bool is_FileManager;
 };
 
 class GUIListBox : public GUIScrollList

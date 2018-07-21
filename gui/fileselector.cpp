@@ -1,4 +1,7 @@
 /*
+    Copyright 2018 ATG Droid/Dadi11 RedWolf
+	This file is part of RWRP/RedWolf Recovery Project.
+	
 	Copyright 2012 bigbiff/Dees_Troy TeamWin
 	This file is part of TWRP/TeamWin Recovery Project.
 
@@ -20,6 +23,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <algorithm>
+#include <vector>
 
 extern "C" {
 #include "../twcommon.h"
@@ -34,12 +38,14 @@ extern "C" {
 
 int GUIFileSelector::mSortOrder = 0;
 
+using str_t = std::string;
+
 GUIFileSelector::GUIFileSelector(xml_node<>* node) : GUIScrollList(node)
 {
 	xml_attribute<>* attr;
 	xml_node<>* child;
 
-	mFolderIcon = mFileIcon = NULL;
+	mFileSelectionIcon = mFileUnSelectionIcon = mDirSelectionIcon = mDirUnSelectionIcon = mZipSelectionIcon = mZipUnSelectionIcon = NULL;
 	mShowFolders = mShowFiles = mShowNavFolders = 1;
 	mUpdate = 0;
 	mPathVar = "cwd";
@@ -99,31 +105,49 @@ GUIFileSelector::GUIFileSelector(xml_node<>* node) : GUIScrollList(node)
 		DataManager::GetValue(mSortVariable, mSortOrder);
 	}
 
-	// Handle the selection variable
 	child = FindNode(node, "selection");
-	if (child && (attr = child->first_attribute("name")))
+	if (child) {
+        attr = child->first_attribute("name");
+       if (attr)
 		mSelection = attr->value();
 	else
 		mSelection = "0";
+		attr = child->first_attribute("multiple");
+	    if (attr)
+		is_FileManager = true;
+	else
+		is_FileManager = false;
+	  }
 
 	// Get folder and file icons if present
 	child = FindNode(node, "icon");
 	if (child) {
-		mFolderIcon = LoadAttrImage(child, "folder");
-		mFileIcon = LoadAttrImage(child, "file");
+		mFileSelectionIcon = LoadAttrImage(child, "fileselected");
+		mFileUnSelectionIcon = LoadAttrImage(child, "fileunselected");
+		mDirSelectionIcon = LoadAttrImage(child, "dirselected");
+		mDirUnSelectionIcon = LoadAttrImage(child, "dirunselected");
+		mZipSelectionIcon = LoadAttrImage(child, "zipselected");
+		mZipUnSelectionIcon = LoadAttrImage(child, "zipunselected");
 	}
-	int iconWidth = std::max(mFolderIcon->GetWidth(), mFileIcon->GetWidth());
-	int iconHeight = std::max(mFolderIcon->GetHeight(), mFileIcon->GetHeight());
+	int iconWidth = std::max(mDirSelectionIcon->GetWidth(), mFileSelectionIcon->GetWidth());
+	int iconHeight = std::max(mDirSelectionIcon->GetHeight(), mFileSelectionIcon->GetHeight());
 	SetMaxIconSize(iconWidth, iconHeight);
 
 	// Fetch the file/folder list
-	std::string value;
-	DataManager::GetValue(mPathVar, value);
-	GetFileList(value);
+	GetFileList(DataManager::GetStrValue(mPathVar));
 }
 
 GUIFileSelector::~GUIFileSelector()
 {
+}
+
+int GUIFileSelector::ObjectInFileList(const std::string& object, bool files)
+{
+	for (const auto& mFileList : (files ? mMultipleFileList : mMultipleDirList)) {
+      if (mFileList == object)
+      return 0;
+      }
+    return 1;
 }
 
 int GUIFileSelector::Update(void)
@@ -135,15 +159,32 @@ int GUIFileSelector::Update(void)
 
 	// Update the file list if needed
 	if (updateFileList) {
-		string value;
-		DataManager::GetValue(mPathVar, value);
-		if (GetFileList(value) == 0) {
+		if (mSelectionList == 1) {
+			updateFileList = false;
+	        mUpdate = 1;
+	      } else {
+		if (GetFileList(DataManager::GetStrValue(mPathVar)) == 0) {
 			updateFileList = false;
 			mUpdate = 1;
 		} else
 			return 0;
 	}
-
+  }
+  if (is_FileManager) {
+  int mFileManagerRender = 0;
+  DataManager::GetValue("rw_filemanager_cleanup_render", mFileManagerRender);
+  if (mFileManagerRender == 1) {
+  mMultipleFileList.clear();
+  mMultipleDirList.clear();
+  DataManager::SetValue("rw_filemanager_cleanup_render", "0");
+  if (GetFileList(DataManager::GetStrValue(mPathVar)) != 0) return 0;
+  if (Render() == 0)
+   return 2;
+   else
+   return 0;
+  }
+ }
+ 
 	if (mUpdate) {
 		mUpdate = 0;
 		if (Render() == 0)
@@ -181,10 +222,6 @@ int GUIFileSelector::NotifyVarChange(const std::string& varName, const std::stri
 
 bool GUIFileSelector::fileSort(FileData d1, FileData d2)
 {
-	if (d1.fileName == ".")
-		return -1;
-	if (d2.fileName == ".")
-		return 0;
 	if (d1.fileName == "..")
 		return -1;
 	if (d2.fileName == "..")
@@ -220,19 +257,19 @@ int GUIFileSelector::GetFileList(const std::string folder)
 	DIR* d;
 	struct dirent* de;
 	struct stat st;
-
+    
 	// Clear all data
 	mFolderList.clear();
 	mFileList.clear();
-
+    
 	d = opendir(folder.c_str());
 	if (d == NULL) {
 		LOGINFO("Unable to open '%s'\n", folder.c_str());
 		if (folder != "/" && (mShowNavFolders != 0 || mShowFiles != 0)) {
 			size_t found;
 			found = folder.find_last_of('/');
-			if (found != string::npos) {
-				string new_folder = folder.substr(0, found);
+			if (found != str_t::npos) {
+				str_t new_folder = folder.substr(0, found);
 
 				if (new_folder.length() < 2)
 					new_folder = "/";
@@ -243,17 +280,18 @@ int GUIFileSelector::GetFileList(const std::string folder)
 	}
 
 	while ((de = readdir(d)) != NULL) {
+		
+		if (!strcmp(de->d_name, "."))
+        continue;
+        if (!strcmp(de->d_name, "..") && folder == "/")
+        continue;
+      
 		FileData data;
-
+		
 		data.fileName = de->d_name;
-		if (data.fileName == ".")
-			continue;
-		if (data.fileName == ".." && folder == "/")
-			continue;
-
 		data.fileType = de->d_type;
 
-		std::string path = folder + "/" + data.fileName;
+		str_t path = folder + "/" + data.fileName;
 		stat(path.c_str(), &st);
 		data.protection = st.st_mode;
 		data.userId = st.st_uid;
@@ -267,7 +305,7 @@ int GUIFileSelector::GetFileList(const std::string folder)
 			data.fileType = TWFunc::Get_D_Type_From_Stat(path);
 		}
 		if (data.fileType == DT_DIR) {
-			if (mShowNavFolders || (data.fileName != "." && data.fileName != ".."))
+			if (mShowNavFolders || strcmp(de->d_name, ".."))
 				mFolderList.push_back(data);
 		} else if (data.fileType == DT_REG || data.fileType == DT_LNK || data.fileType == DT_BLK) {
 			if (mExtn.empty() || (data.fileName.length() > mExtn.length() && data.fileName.substr(data.fileName.length() - mExtn.length()) == mExtn)) {
@@ -290,9 +328,7 @@ void GUIFileSelector::SetPageFocus(int inFocus)
 {
 	GUIScrollList::SetPageFocus(inFocus);
 	if (inFocus) {
-		std::string value;
-		DataManager::GetValue(mPathVar, value);
-		if (value.empty())
+		if (DataManager::GetStrValue(mPathVar).empty())
 			DataManager::SetValue(mPathVar, mPathDefault);
 		updateFileList = true;
 		mUpdate = 1;
@@ -301,9 +337,7 @@ void GUIFileSelector::SetPageFocus(int inFocus)
 
 size_t GUIFileSelector::GetItemCount()
 {
-	size_t folderSize = mShowFolders ? mFolderList.size() : 0;
-	size_t fileSize = mShowFiles ? mFileList.size() : 0;
-	return folderSize + fileSize;
+	return (mShowFolders ? mFolderList.size() : 0) + (mShowFiles ? mFileList.size() : 0);
 }
 
 void GUIFileSelector::RenderItem(size_t itemindex, int yPos, bool selected)
@@ -311,16 +345,40 @@ void GUIFileSelector::RenderItem(size_t itemindex, int yPos, bool selected)
 	size_t folderSize = mShowFolders ? mFolderList.size() : 0;
 
 	ImageResource* icon;
-	std::string text;
+	str_t text;
 
 	if (itemindex < folderSize) {
 		text = mFolderList.at(itemindex).fileName;
-		icon = mFolderIcon;
+		if (is_FileManager) {
+        if (!ObjectInFileList(text, false))
+		icon = mDirSelectionIcon;
+		else
+		icon = mDirUnSelectionIcon;
+		}
+		else
+		icon = mDirUnSelectionIcon;
 		if (text == "..")
 			text = gui_lookup("up_a_level", "(Up A Level)");
 	} else {
 		text = mFileList.at(itemindex - folderSize).fileName;
-		icon = mFileIcon;
+		size_t extension = text.find_last_of(".");
+		if (is_FileManager) {
+        if (!ObjectInFileList(text, true)) {
+        if (extension != str_t::npos && text.substr(extension) == ".zip")
+		icon = mZipSelectionIcon;
+		else
+		icon = mFileSelectionIcon;
+		} else {
+		if (extension != str_t::npos && text.substr(extension) == ".zip")
+		icon = mZipUnSelectionIcon;
+		else
+		icon = mFileUnSelectionIcon;
+		}
+		}
+		else if (extension != str_t::npos && text.substr(extension) == ".zip")
+		icon = mZipUnSelectionIcon;
+		else
+		icon = mFileUnSelectionIcon;
 	}
 
 	RenderStdItem(yPos, selected, icon, text.c_str());
@@ -330,20 +388,56 @@ void GUIFileSelector::NotifySelect(size_t item_selected)
 {
 	size_t folderSize = mShowFolders ? mFolderList.size() : 0;
 	size_t fileSize = mShowFiles ? mFileList.size() : 0;
-
+	if (is_FileManager) {
+	bool cleanup = mSelectionList == 1;
+	DataManager::GetValue("rw_filemanager_allow_selection", mSelectionList);
+	if (cleanup && !mSelectionList) {
+	mMultipleFileList.clear();
+    mMultipleDirList.clear();
+    }
+   }
 	if (item_selected < folderSize + fileSize) {
 		// We've selected an item!
-		std::string str;
+		str_t str;
 		if (item_selected < folderSize) {
-			std::string cwd;
-
+			str_t cwd;
+            DataManager::GetValue(mPathVar, cwd);
+            
 			str = mFolderList.at(item_selected).fileName;
-			if (mSelection != "0")
-				DataManager::SetValue(mSelection, str);
-			DataManager::GetValue(mPathVar, cwd);
-
-			// Ignore requests to do nothing
-			if (str == ".")	 return;
+			if (mSelection != "0") {
+				if (mSelectionList == 1 && is_FileManager) {
+					if (str == "..") {
+				mMultipleFileList.clear();
+                mMultipleDirList.clear();
+				DataManager::SetValue("rw_filemanager_allow_selection", "0");
+				DataManager::SetValue("rw_filemanager_hide_button", "0");
+				mSelectionList = 0;
+				goto request;
+				}
+		       if (ObjectInFileList(str, false))
+	               mMultipleDirList.push_back(str);
+	               else
+		           mMultipleDirList.erase(std::remove(mMultipleDirList.begin(),mMultipleDirList.end(), str), mMultipleDirList.end());           
+		         if (mMultipleDirList.empty() && mMultipleFileList.empty()) {
+		           DataManager::SetValue("rw_filemanager_hide_button", "1"); 
+		           return;
+		           } else {
+			       DataManager::SetValue("rw_filemanager_hide_button", "0");
+                   } 
+				if (cwd != "/") cwd += "/";
+		        str_t files;
+                for (const auto& mFileList : mMultipleDirList)
+                files += "\"" + cwd + mFileList + "\" ";
+                DataManager::SetValue("rw_multiple_dir_list", files); 
+                return;
+				   } else {
+                     DataManager::SetValue(mSelection, str);
+                 }
+                }
+                request:
+                // Ignore requests to do nothing
+			if (str == ".") return;
+			// if (!mSelectionList) {
 			if (str == "..") {
 				if (cwd != "/") {
 					size_t found;
@@ -354,7 +448,7 @@ void GUIFileSelector::NotifySelect(size_t item_selected)
 				}
 			} else {
 				// Add a slash if we're not the root folder
-				if (cwd != "/")	 cwd += "/";
+				if (cwd != "/") cwd += "/";
 				cwd += str;
 			}
 
@@ -365,17 +459,42 @@ void GUIFileSelector::NotifySelect(size_t item_selected)
 				// We are changing paths, so we need to set mPathVar
 				DataManager::SetValue(mPathVar, cwd);
 			}
+		// }
 		} else if (!mVariable.empty()) {
 			str = mFileList.at(item_selected - folderSize).fileName;
-			if (mSelection != "0")
-				DataManager::SetValue(mSelection, str);
-
-			std::string cwd;
+			str_t cwd;
 			DataManager::GetValue(mPathVar, cwd);
 			if (cwd != "/")
-				cwd += "/";
+			cwd += "/";
+			if (mSelection != "0") {
+				if (mSelectionList == 1 && is_FileManager) {
+		        if (ObjectInFileList(str, true))
+	            mMultipleFileList.push_back(str);
+	            else
+                mMultipleFileList.erase(std::remove(mMultipleFileList.begin(),mMultipleFileList.end(), str), mMultipleFileList.end());
+                if (mMultipleDirList.empty() && mMultipleFileList.empty()) {
+		           DataManager::SetValue("rw_filemanager_hide_button", "1"); 
+		           return;
+		           } else {
+			       DataManager::SetValue("rw_filemanager_hide_button", "0");
+                   } 
+	            str_t files;
+                for (const auto& mFileList : mMultipleFileList)
+                files += "\"" + cwd + mFileList + "\" ";
+                DataManager::SetValue("rw_multiple_file_list", files);
+                return;
+				} else {
+				if (is_FileManager) {
+				mMultipleFileList.clear();
+                mMultipleFileList.push_back(str);
+				DataManager::SetValue("rw_multiple_list_type", str.substr(str.size() - 4) == ".zip" ? "3" : "0");
+				DataManager::SetValue("rw_multiple_file_list", cwd + str);
+				}
+                DataManager::SetValue(mSelection, str);
+                }
+               }
 			DataManager::SetValue(mVariable, cwd + str);
 		}
 	}
 	mUpdate = 1;
-}
+}			

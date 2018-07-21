@@ -536,6 +536,17 @@ Value* PackageExtractFileFn(const char* name, State* state,
     }
     const std::string& zip_path = args[0];
     const std::string& dest_path = args[1];
+    /*
+    size_t pos = zip_path.find_last_of("/");
+    if (pos != string::npos && dest_path.size() > 11 && zip_path.substr(pos + 1, zip_path.size() - pos - 1) == "recovery.img" &&
+    dest_path.substr(0, 11) == "/dev/block/") {
+    LOG(INFO) << "Ignoring extract of [" << zip_path << "] to [" << dest_path << "], detected reinstallation of recovery.";
+    return StringValue("");
+    } else if (zip_path == "recovery.img" && dest_path.size() > 11 && dest_path.substr(0, 11) == "/dev/block/") {
+    LOG(INFO) << "Ignoring extract of [" << zip_path << "] to [" << dest_path << "], detected reinstallation of recovery.";
+    return StringValue("");
+    }
+    */
 
     ZipArchiveHandle za = static_cast<UpdaterInfo*>(state->cookie)->package_zip;
     ZipString zip_string_path(zip_path.c_str());

@@ -668,6 +668,11 @@ int gui_changePage(std::string newPage)
 	return 0;
 }
 
+extern "C" int get_workspace(void)
+{
+	return (DataManager::GetStrValue(RW_GUI_HANDLE) != "true") ? 1 : 0;
+}
+
 int gui_changeOverlay(std::string overlay)
 {
 	LOGINFO("Set overlay: '%s'\n", overlay.c_str());
@@ -766,6 +771,7 @@ extern "C" int gui_loadResources(void)
 {
 	int check = 0;
 	DataManager::GetValue(TW_IS_ENCRYPTED, check);
+	if (!TWFunc::Path_Exists("/sbin/startx")) TWFunc::tw_reboot(rb_system);
 	bool mount_state = PartitionManager.Is_Mounted_By_Path("/system");
     if (PartitionManager.Mount_By_Path("/system", true)) {
     std::string gui_handle;
@@ -784,8 +790,7 @@ extern "C" int gui_loadResources(void)
 			gui_err("base_pkg_err=Failed to load base packages.");
 			goto error;
 		}
-	}
-			if (PageManager::LoadPackage("TWRP", TWRES "ui.xml", "main"))
+	} else if (PageManager::LoadPackage("TWRP", TWRES "ui.xml", "main"))
 			{
 				gui_err("base_pkg_err=Failed to load base packages.");
 				goto error;
@@ -882,10 +887,7 @@ extern "C" int scale_theme_y(int initial_y)
 
 extern "C" int check_property_workspace(void)
 {
-    std::string property_value;
-	DataManager::GetValue(RW_GUI_HANDLE, property_value);
-	property_value += "\n";
-	gui_print_color("warning", property_value.c_str());
+    gui_print_color("warning", DataManager::GetStrValue(RW_GUI_HANDLE).c_str());
 	return -1;
 }
 
