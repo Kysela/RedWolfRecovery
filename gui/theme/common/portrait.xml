@@ -8842,13 +8842,13 @@
 			</button>
 
 			<button style="btn_flat_qw">
-				<placement x="%btn_rot_2_x%" y="%row8_1a_y%" placement="1"/>
+				<placement x="%btn_raised_2_x%" y="%row8_1a_y%" placement="1"/>
 				<text>4x4</text>
 				<action function="set">tw_gui_pattern_grid_size=4</action>
 			</button>
 
 			<button style="btn_flat_qw">
-				<placement x="%btn_rot_3_x%" y="%row8_1a_y%"/>
+				<placement x="%btn_raised_3_x%" y="%row8_1a_y%" placement="1"/>
 				<text>5x5</text>
 				<action function="set">tw_gui_pattern_grid_size=5</action>
 			</button>

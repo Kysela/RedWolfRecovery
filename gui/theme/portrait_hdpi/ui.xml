@@ -342,6 +342,9 @@
 		<variable name="btn_raised_left_x" value="27"/>
 		<variable name="btn_raised_right_x" value="1053"/>
 
+                <variable name="btn_raised_2_x" value="540"/>
+                <variable name="btn_raised_3_x" value="796"/>
+
 		<variable name="row0_y" value="240"/>
 		<variable name="row0_a_y" value="270"/>
 		<variable name="row1_1_y" value="300"/>
