@@ -63,6 +63,7 @@
 #define RW_INCREMENTAL_OTA_FAIL                 "wolf_ota_fail"
 #define RW_GUI_HANDLE        "wolf_handle_gui_progress"
 #define RW_MAIN_SURVIVAL_TRIGGER         "wolf_main_survival_trigger"
+#define RW_BACKUP_APP_DATA     "wolf_backup_app_data"
 
 #define TW_USE_COMPRESSION_VAR      "tw_use_compression"
 #define TW_FILENAME                 "tw_filename"

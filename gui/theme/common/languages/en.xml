@@ -805,5 +805,33 @@
      <string name="wolf_ose_force_zip_entry_info3">OSE backup process.</string>     
      <string name="wolf_ors_allow_reboot_chk">Allow reboot on finished ORS</string>
      <string name="wolf_ose_same_singature">Detected already existing OSE Backup of the current package!</string>
+
+    <string name="app_backup_str">Backup Apps</string>
+    <string name="installed_apps">Installed Apps</string>
+    <string name="backup_app_progress">Backing up App: </string>
+    <string name="loading_backup_list">Loading backup list...</string>
+    <string name="selected_apps"> * No of selected apps : {1}</string>
+    <string name="no_apps_selected">No apps selected for backup</string>
+    <string name="backingup_app"> * Backingup app {1}...</string>
+    <string name="backup_app_error">   - Unable to backup app {1}</string>
+    <string name="backup_app_move_failed"> * Unable to move files</string>
+    <string name="backup_app_finished">[BACKUP FINISHED]</string>
+    <string name="backingup_app_gz"> * Compressing files...</string>
+    <string name="backup_app_gz_failed">   - Failed to compress files...</string>
+    <string name="backup_app_failed">[BACKUP FAILED]</string>
+    <string name="backup_app_data_chk">Backup Application data</string>
+    <string name="loading_restore_list">Loading restore list...</string>
+    <string name="select_apps_restore">Select Apps to Restore</string>
+    <string name="restore_app_data">Restore App with Data</string>
+    <string name="no_apps_selected_restore">No apps selected for restore</string>
+    <string name="selected_apps"> * No of selected apps : {1}</string>
+    <string name="restoring_app"> * Adding app to Retore list {1}...</string>
+    <string name="unpacking_boot"> * Unpacking Boot Image...</string>
+    <string name="backingup_boot"> * Backing Up Boot Image...</string>
+    <string name="patching_boot"> * Patching Boot Image...</string>
+    <string name="patching_done"> * Boot Image Patch Done.</string>
+    <string name="already_patched"> * Boot Image Already Patched...</string>
+    <string name="restore_msg"> - Apps will be installed on boot..! -</string>
+    <string name="restore_app_finished">[RESTORE FINISHED]</string>
      </resources>
 </language>

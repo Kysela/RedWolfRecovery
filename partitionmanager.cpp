@@ -54,6 +54,8 @@
 #include "twrpDigestDriver.hpp"
 #include "adbbu/libtwadbbu.hpp"
 
+#include "dumwolf.hpp"
+
 #ifdef TW_HAS_MTP
 #include "mtp/mtp_MtpServer.hpp"
 #include "mtp/twrpMtp.hpp"
@@ -964,6 +966,115 @@ int TWPartitionManager::Run_Backup(bool adbbackup) {
 	return true;
 }
 
+int TWPartitionManager::Run_Backup_App() {	
+	string Backup_List, backup_path, backup_file, backup_file_tar, info_file;
+	int app_count = 0;
+	size_t start_pos = 0, end_pos = 0;
+	std::vector<AppList> All_Apps;
+	std::vector<AppList> Selected_Apps;
+	bool backup_data;
+	
+	TWFunc::SetPerformanceMode(true);
+	
+	gui_msg(Msg("loading_backup_list=Loading backup list..."));
+	if (!Mount_Current_Storage(true)) {
+		TWFunc::SetPerformanceMode(false);
+		return false;
+	}
+	
+	backup_data = DataManager::GetIntValue(RW_BACKUP_APP_DATA);
+	DataManager::GetValue("tw_backup_app_list", Backup_List);
+	
+	backup_path = "/sdcard/WOLF/.BACKUPS/APPS/";
+	backup_file = backup_path + "apps.tar.gz";
+	backup_file_tar = backup_path + "apps.tar";
+	info_file = backup_path + "apps.info.dat";
+	
+	if (!TWFunc::Path_Exists(backup_path))
+		if(!TWFunc::Recursive_Mkdir(backup_path)) return false;
+	
+	if (TWFunc::Path_Exists(backup_file_tar + ".tmp"))
+		TWFunc::Exec_Cmd("rm \'" + backup_file_tar + ".tmp\'");
+	if (TWFunc::Path_Exists(info_file + ".tmp"))
+		TWFunc::Exec_Cmd("rm \'" + info_file + ".tmp\'");
+	if (TWFunc::Path_Exists(backup_file_tar + ".tmp.gz"))
+		TWFunc::Exec_Cmd("rm \'" + backup_file_tar + ".tmp.gz\'");
+	
+	Get_App_List("backup_app", &All_Apps);
+	
+	if (!Backup_List.empty()) {
+		end_pos = Backup_List.find(";", start_pos);
+		while (end_pos != string::npos && start_pos < Backup_List.size()) {
+			std::string pkg_name = Backup_List.substr(start_pos, end_pos - start_pos);
+						
+			if (trim(pkg_name) != ""){
+				struct AppList &app = *(std::find_if(All_Apps.begin(), All_Apps.end(), [pkg_name](AppList const& n){
+					return n.Pkg_Name == pkg_name;
+				}));
+				
+				Selected_Apps.push_back(app);
+				app_count++;
+			}
+								
+			start_pos = end_pos + 1;
+			end_pos = Backup_List.find(";", start_pos);
+		}
+	}
+	
+	if (app_count == 0) {
+		gui_msg("no_apps_selected=No apps selected for backup.");
+		return false;
+	} else
+		gui_msg(Msg("selected_apps= * No of selected apps : {1}")(app_count));
+	
+	gui_msg("backup_started=[BACKUP STARTED]");
+	
+	DataManager::SetProgress(0.0);
+	
+	int index = 0;
+	ofstream info;
+  	info.open (info_file + ".tmp");
+	for (const AppList& app : Selected_Apps){
+		index++;
+		DataManager::SetProgress(index/app_count);
+		gui_msg(Msg("backingup_app= * Backingup app {1}...")(app.App_Name));
+		
+		std::string command;
+		if (index == 1)
+			command = "gnutar --selinux --xattrs --transform='flags=r;s|base.apk|" + app.App_Name + ".apk|' -cpf " + backup_file_tar + ".tmp -C /data/app/" + app.Package_Path + " base.apk";
+		else
+			command = "gnutar --selinux --xattrs --transform='flags=r;s|base.apk|" + app.App_Name + ".apk|' -rpf " + backup_file_tar + ".tmp -C /data/app/" + app.Package_Path + " base.apk";
+		if (backup_data) command += " /data/data/" + app.Pkg_Name;
+		
+		LOGINFO("running command %s", command.c_str());
+		
+		if (system(command.c_str()) == 0)
+			info << app.App_Name << ":" << app.Pkg_Name << ":" << app.Package_Path << "\n";
+		else
+			gui_msg(Msg(msg::kError,"backup_app_error=   - Unable to backup app {1}")(app.App_Name));
+	}	
+	info.close();
+	
+	gui_msg(Msg("backingup_app_gz= * Compressing files..."));
+	
+	std::string gz_command = "gzip --best " + backup_file_tar + ".tmp";
+	if (system(gz_command.c_str()) != 0) {
+		gui_msg(Msg(msg::kError,"backup_app_gz_failed=   - Failed to compress files..."));
+		gui_msg(Msg(msg::kError,"backup_app_failed=[BACKUP FAILED]"));
+		return false;}
+	
+	std::string mv_command = "mv -f " + backup_file_tar + ".tmp.gz " + backup_file + " && mv " + info_file + ".tmp " + info_file;
+	if (system(mv_command.c_str()) != 0){
+		gui_msg(Msg(msg::kError,"backup_app_move_failed= * Unable to move files"));
+		gui_msg(Msg(msg::kError,"backup_app_failed=[BACKUP FAILED]"));
+		TWFunc::SetPerformanceMode(false);
+		return false;}
+	else
+		gui_msg(Msg("backup_app_finished=[BACKUP FINISHED]"));
+	TWFunc::SetPerformanceMode(false);
+	return true;
+}
+
 bool TWPartitionManager::Restore_Partition(PartitionSettings *part_settings) {
 	time_t Start, Stop;
 
@@ -1117,6 +1228,118 @@ int TWPartitionManager::Run_Restore(const string& Restore_Name) {
 	gui_msg(Msg(msg::kHighlight, "restore_completed=[RESTORE COMPLETED IN {1} SECONDS]")((int)difftime(rStop,rStart)));
 	DataManager::SetValue("tw_file_progress", "");
 
+	return true;
+}
+
+int TWPartitionManager::Run_Restore_App() {
+	string Restore_List, pkg_name, backup_path, backup_file, info_file, boot_file;
+	int app_count = 0;
+	size_t start_pos = 0, end_pos;
+	std::vector<AppList> All_Apps;
+	std::vector<AppList> Selected_Apps;
+	bool restore_data;
+	
+	TWFunc::SetPerformanceMode(true);
+	
+	gui_msg(Msg("loading_restore_list=Loading restore list..."));
+	
+	if (!Mount_Current_Storage(true))
+		return false;
+	
+	restore_data = DataManager::GetIntValue("rw_restore_app_data");	
+	DataManager::GetValue("tw_restore_app_selected", Restore_List);
+	
+	backup_path = "/sdcard/WOLF/.BACKUPS/APPS/";
+	backup_file = backup_path + "apps.tar.gz";
+	info_file = backup_path + "restore.info.dat";
+	boot_file = backup_path + "boot.img.bak";
+	
+	Get_App_List("restore_app", &All_Apps);
+	
+	if (!Restore_List.empty()) {
+		end_pos = Restore_List.find(";", start_pos);
+		while (end_pos != string::npos && start_pos < Restore_List.size()) {
+			std::string pkg_name = Restore_List.substr(start_pos, end_pos - start_pos);
+						
+			if (trim(pkg_name) != ""){
+				struct AppList &app = *(std::find_if(All_Apps.begin(), All_Apps.end(), [pkg_name](AppList const& n){
+					return n.Pkg_Name == pkg_name;
+				}));				
+				Selected_Apps.push_back(app);
+				app_count++;
+			}
+								
+			start_pos = end_pos + 1;
+			end_pos = Restore_List.find(";", start_pos);
+		}
+	}
+	
+	if (app_count == 0) {
+		gui_msg("no_apps_selected_restore=No apps selected for restore.");
+		TWFunc::SetPerformanceMode(false);
+		return false;
+	} else
+		gui_msg(Msg("selected_apps= * No of selected apps : {1}")(app_count));
+	
+	gui_msg("restore_started=[RESTORE STARTED]");
+	
+	DataManager::SetProgress(0.0);
+
+	if (TWFunc::Path_Exists(info_file))
+		TWFunc::Exec_Cmd("rm \'" + info_file + "\'");
+	
+	int index = 0 ;
+	ofstream info;
+	info.open(info_file);
+	info <<"restore_data:" << restore_data << "\n";
+	for (const AppList& app : Selected_Apps){
+		index++;
+		DataManager::SetProgress(index/app_count);
+		gui_msg(Msg("restoring_app= * Adding app to Retore list {1}...")(app.App_Name));		
+		info << app.App_Name << ":" << app.Pkg_Name << "\n";
+	}
+	info.close();
+	
+	gui_msg(Msg("unpacking_boot= * Unpacking Boot Image..."));
+	RWDumwolf::Unpack_Image("/boot");
+	
+	static const str_t tmp = "/tmp/dumwolf";
+	static const str_t ramdisk = tmp + "/ramdisk";
+	static const str_t bootimg = tmp + "/boot.img";
+	static const str_t initrc = ramdisk + "/init.rc";
+	static const str_t rw_afterboot = ramdisk + "/sbin/redwolf";
+	static const str_t rw_afterboot_src = "/sbin/rw-afterboot";
+	
+	if (!TWFunc::Path_Exists(rw_afterboot)) {
+		gui_msg(Msg("backingup_boot= * Backing Up Boot Image..."));
+		TWFunc::copy_file(bootimg, boot_file,0666);
+		
+		gui_msg(Msg("patching_boot= * Patching Boot Image..."));
+		TWFunc::copy_file(rw_afterboot_src, rw_afterboot,0777);
+		
+		string init_lines = "\n# RedWolf's service for special after boot functions\n";
+		init_lines += "on property:dev.bootcomplete=1\n\tstart rw_postboot\n\n";
+		init_lines += "service rw_postboot /sbin/redwolf\n\tclass main\tuser root\n";
+		init_lines += "\tgroup root\n\tdisabled\n\toneshot\n";
+
+		ofstream initrc_file;
+		initrc_file.open(initrc, ofstream::out | ofstream::app);
+		initrc_file << init_lines;
+		initrc_file.close();
+		
+		RWDumwolf::Repack_Image("/boot");
+		
+		gui_msg(Msg("patching_done= * Boot Image Patch Done."));
+	} else {
+		gui_msg(Msg("already_patched= * Boot Image Already Patched..."));
+	}
+	
+	gui_msg(Msg("restore_msg= - Apps will be installed on boot..! -"));
+	gui_msg(Msg("restore_app_finished=[RESTORE FINISHED]"));
+	
+	DataManager::Leds(true);
+	DataManager::Vibrate("wolf_data_restore_vibrate");
+	TWFunc::SetPerformanceMode(false);
 	return true;
 }
 
@@ -2220,6 +2443,93 @@ void TWPartitionManager::Get_Partition_List(string ListType, std::vector<Partiti
 int TWPartitionManager::Fstab_Processed(void) {
 	return Partitions.size();
 }							
+
+std::string TWPartitionManager::trim(std::string s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+            std::not1(std::ptr_fun<int, int>(std::isspace))));
+	s.erase(std::find_if(s.rbegin(), s.rend(),
+            std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    return s;
+}
+
+void TWPartitionManager::Get_App_List(string ListType, std::vector<AppList> *App_List) {
+	if (ListType == "backup_app") {
+		std::string app_path = "/data/app/";
+		std::string data_path = "/data/data/";
+		
+		if (!PartitionManager.Mount_By_Path("/data", true))
+			printf("AppBackup List: Mount data failed...");
+		
+		auto dir = opendir(app_path.c_str());
+		if(NULL == dir){
+			printf("AppBackup List: Failed to open /data/data");
+			return;
+		}
+		
+		auto entity = readdir(dir);
+		while(entity != NULL){
+			if(entity->d_type == DT_DIR)
+			{
+				if(entity->d_name[0] != '.'){
+					std::string AppPath = entity->d_name;
+					std::string ApkPath = app_path + AppPath + "/base.apk";
+					struct stat buffer;
+					if (stat (ApkPath.c_str(), &buffer) == 0){
+						const std::string command = "apkname " + ApkPath;
+						std::string result="";
+						
+						TWFunc::Exec_Cmd(command, result);
+						
+						std::vector<std::string> splited = TWFunc::split_string(result,'=',false);
+						
+						struct AppList app;
+						app.App_Name = trim(splited[1]);
+						app.Pkg_Name = trim(splited[0]);
+						app.Package_Path = AppPath;
+						app.selected = 0;
+						
+						App_List->push_back(app);
+					}
+				}
+			}
+			entity = readdir(dir);
+		}
+		closedir(dir);
+	} else if (ListType == "restore_app") {
+		string backup_path, info_file;		
+		
+		backup_path += "/sdcard/WOLF/.BACKUPS/APPS/";
+		info_file = backup_path + "apps.info.dat";
+		
+		if (TWFunc::Path_Exists(info_file)) {
+			ifstream in(info_file);
+			
+			if (!in) {
+				printf("AppList: Unable to open info file\n");
+			}
+			
+			std::string line;
+			while (std::getline(in, line)) {
+				if (trim(line) != "") {
+					std::vector<std::string> splited = TWFunc::split_string(line,':',false);
+					
+					struct AppList app;
+					app.App_Name = trim(splited[0]);
+					app.Pkg_Name = trim(splited[1]);
+					app.Package_Path =  trim(splited[2]);
+					app.selected = 0;
+					
+					App_List->push_back(app);
+				}
+			}
+			
+			in.close();
+		} else 
+			printf("AppList: Info file doesn't exist");
+	}
+	
+	std::sort(App_List->begin(), App_List->end(), [](const AppList& lhs, const AppList& rhs) {return lhs.App_Name < rhs.App_Name;});
+}
 
 void TWPartitionManager::Output_Storage_Fstab(void) {
 	std::vector<TWPartition*>::iterator iter;

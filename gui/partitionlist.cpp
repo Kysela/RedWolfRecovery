@@ -67,7 +67,8 @@ GUIPartitionList::GUIPartitionList(xml_node<>* node) : GUIScrollList(node)
 		ListType = attr->value();
 		updateList = true;
 	} else {
-		mList.clear();
+		mPartList.clear();
+		mAppList.clear();
 		LOGERR("No partition listtype specified for partitionlist GUI element\n");
 		return;
 	}
@@ -84,13 +85,13 @@ int GUIPartitionList::Update(void)
 
 	// Check for changes in mount points if the list type is mount and update the list and render if needed
 	if (ListType == "mount") {
-		int listSize = mList.size();
+		int listSize = mPartList.size();
 		for (int i = 0; i < listSize; i++) {
-			if (PartitionManager.Is_Mounted_By_Path(mList.at(i).Mount_Point) && !mList.at(i).selected) {
-				mList.at(i).selected = 1;
+			if (PartitionManager.Is_Mounted_By_Path(mPartList.at(i).Mount_Point) && !mPartList.at(i).selected) {
+				mPartList.at(i).selected = 1;
 				mUpdate = 1;
-			} else if (!PartitionManager.Is_Mounted_By_Path(mList.at(i).Mount_Point) && mList.at(i).selected) {
-				mList.at(i).selected = 0;
+			} else if (!PartitionManager.Is_Mounted_By_Path(mPartList.at(i).Mount_Point) && mPartList.at(i).selected) {
+				mPartList.at(i).selected = 0;
 				mUpdate = 1;
 			}
 		}
@@ -98,12 +99,24 @@ int GUIPartitionList::Update(void)
 
 	GUIScrollList::Update();
 
+	if (ListType == "restore_app") {
+		bool refreshlist = DataManager::GetIntValue("rw_refresh_restore");
+		if (refreshlist) {			
+			updateList = true;
+		}
+	}
+	
 	if (updateList) {
 		// Completely update the list if needed -- Used primarily for
 		// restore as the list for restore will change depending on what
 		// partitions were backed up
-		mList.clear();
-		PartitionManager.Get_Partition_List(ListType, &mList);
+		mPartList.clear();
+		mAppList.clear();
+		if (ListType == "backup_app" || ListType == "restore_app") {
+			PartitionManager.Get_App_List(ListType, &mAppList);
+			DataManager::SetValue("rw_refresh_restore","0");}
+		else				
+			PartitionManager.Get_Partition_List(ListType, &mPartList);
 		SetVisibleListLocation(0);
 		updateList = false;
 		mUpdate = 1;
@@ -147,86 +160,97 @@ int GUIPartitionList::NotifyVarChange(const std::string& varName, const std::str
 
 void GUIPartitionList::SetPageFocus(int inFocus)
 {
-	GUIScrollList::SetPageFocus(inFocus);
-	if (inFocus) {
-		if (ListType == "osestorage" || ListType == "storage" || ListType == "flashimg") {
-			DataManager::GetValue(mVariable, currentValue);
-			SetPosition();
+	if (ListType != "backup_app" && ListType != "restore_app") {
+		GUIScrollList::SetPageFocus(inFocus);
+		if (inFocus) {
+			if (ListType == "osestorage" || ListType == "storage" || ListType == "flashimg") {
+				DataManager::GetValue(mVariable, currentValue);
+				SetPosition();
+			}
 		}
-		updateList = true;
-		mUpdate = 1;
 	}
 }
 
 void GUIPartitionList::MatchList(void) {
-	int i, listSize = mList.size();
+	int i, listSize = mPartList.size();
 	string variablelist, searchvalue;
 	size_t pos;
 
 	DataManager::GetValue(mVariable, variablelist);
 
 	for (i = 0; i < listSize; i++) {
-		searchvalue = mList.at(i).Mount_Point + ";";
+		searchvalue = mPartList.at(i).Mount_Point + ";";
 		pos = variablelist.find(searchvalue);
 		if (pos != string::npos) {
-			mList.at(i).selected = 1;
+			mPartList.at(i).selected = 1;
 		} else {
-			mList.at(i).selected = 0;
+			mPartList.at(i).selected = 0;
 		}
 	}
 }
 
 void GUIPartitionList::SetPosition() {
-	int listSize = mList.size();
+	int listSize = mPartList.size();
 
 	SetVisibleListLocation(0);
 	for (int i = 0; i < listSize; i++) {
-		if (mList.at(i).Mount_Point == currentValue) {
-			mList.at(i).selected = 1;
+		if (mPartList.at(i).Mount_Point == currentValue) {
+			mPartList.at(i).selected = 1;
 			SetVisibleListLocation(i);
 		} else {
-			mList.at(i).selected = 0;
+			mPartList.at(i).selected = 0;
 		}
 	}
 }
 
 size_t GUIPartitionList::GetItemCount()
 {
-	return mList.size();
+	return (ListType == "backup_app" || ListType == "restore_app") ? mAppList.size() : mPartList.size();
 }
 
 void GUIPartitionList::RenderItem(size_t itemindex, int yPos, bool selected)
 {
 	// note: the "selected" parameter above is for the currently touched item
 	// don't confuse it with the more persistent "selected" flag per list item used below
-	ImageResource* icon = mList.at(itemindex).selected ? mIconSelected : mIconUnselected;
-	const std::string& text = mList.at(itemindex).Display_Name;
-
+	ImageResource* icon;
+	if (ListType == "backup_app" || ListType == "restore_app")
+		icon = mAppList.at(itemindex).selected ? mIconSelected : mIconUnselected;
+	else
+		icon = mPartList.at(itemindex).selected ? mIconSelected : mIconUnselected;
+	std::string txt;
+	if (ListType == "backup_app" || ListType == "restore_app")
+		txt = (mAppList.at(itemindex).App_Name == "") ? mAppList.at(itemindex).Pkg_Name : mAppList.at(itemindex).App_Name;
+	else
+		txt = mPartList.at(itemindex).Display_Name;
+	const std::string& text = txt;
 	RenderStdItem(yPos, selected, icon, text.c_str());
 }
 
 void GUIPartitionList::NotifySelect(size_t item_selected)
 {
-	if (item_selected < mList.size()) {
-		int listSize = mList.size();
+	bool isAppList = (ListType == "backup_app" || ListType == "restore_app");
+	int listSize = isAppList ? mAppList.size() : mPartList.size();
+	
+	if (item_selected < listSize) {		
 		if (ListType == "mount") {
-			if (!mList.at(item_selected).selected) {
-				if (PartitionManager.Mount_By_Path(mList.at(item_selected).Mount_Point, true)) {
-					mList.at(item_selected).selected = 1;
-					PartitionManager.Add_MTP_Storage(mList.at(item_selected).Mount_Point);
+			if (!mPartList.at(item_selected).selected) {
+				if (PartitionManager.Mount_By_Path(mPartList.at(item_selected).Mount_Point, true)) {
+					mPartList.at(item_selected).selected = 1;
+					PartitionManager.Add_MTP_Storage(mPartList.at(item_selected).Mount_Point);
 					mUpdate = 1;
 				}
 			} else {
-				if (PartitionManager.UnMount_By_Path(mList.at(item_selected).Mount_Point, true)) {
-					mList.at(item_selected).selected = 0;
+				if (PartitionManager.UnMount_By_Path(mPartList.at(item_selected).Mount_Point, true)) {
+					mPartList.at(item_selected).selected = 0;
 					mUpdate = 1;
 				}
 			}
 		} else if (!mVariable.empty()) {
 			if (ListType == "storage" || ListType == "osestorage") {
 				int i;
-				std::string str = mList.at(item_selected).Mount_Point;
+				std::string str = mPartList.at(item_selected).Mount_Point;
 				bool update_size = false;
+				
 				TWPartition* Part = PartitionManager.Find_Partition_By_Path(str);
 				if (Part == NULL) {
 					LOGERR("Unable to locate partition for '%s'\n", str.c_str());
@@ -240,38 +264,57 @@ void GUIPartitionList::NotifySelect(size_t item_selected)
 					// Do Nothing
 				} else {
 					for (i=0; i<listSize; i++)
-						mList.at(i).selected = 0;
-
+						mPartList.at(i).selected = 0;
+					
 					if (update_size) {
 						char free_space[255];
 						sprintf(free_space, "%llu", Part->Free / 1024 / 1024);
-						mList.at(item_selected).Display_Name = Part->Storage_Name + " (";
-						mList.at(item_selected).Display_Name += free_space;
-						mList.at(item_selected).Display_Name += "MB)";
+						mPartList.at(item_selected).Display_Name = Part->Storage_Name + " (";
+						mPartList.at(item_selected).Display_Name += free_space;
+						mPartList.at(item_selected).Display_Name += "MB)";
 					}
-					mList.at(item_selected).selected = 1;
+					mPartList.at(item_selected).selected = 1;
 					mUpdate = 1;
-
+					
 					DataManager::SetValue(mVariable, str);
 				}
-			} else {
-				if (ListType == "flashimg") { // only one item can be selected for flashing images
-					for (int i=0; i<listSize; i++)
-						mList.at(i).selected = 0;
-				}
-				if (mList.at(item_selected).selected)
-					mList.at(item_selected).selected = 0;
+			} else if (isAppList) {				
+				if (mAppList.at(item_selected).selected)
+					mAppList.at(item_selected).selected = 0;
 				else
-					mList.at(item_selected).selected = 1;
-
+					mAppList.at(item_selected).selected = 1;
+				
 				int i;
 				string variablelist;
 				for (i=0; i<listSize; i++) {
-					if (mList.at(i).selected) {
-						variablelist += mList.at(i).Mount_Point + ";";
+					if (mAppList.at(i).selected) {
+						variablelist += mAppList.at(i).Pkg_Name + ";";
 					}
 				}
-
+				
+				mUpdate = 1;
+				if (selectedList.empty())
+					DataManager::SetValue(mVariable, variablelist);
+				else
+					DataManager::SetValue(selectedList, variablelist);				
+			} else {
+				if (ListType == "flashimg") { // only one item can be selected for flashing images
+					for (int i=0; i<listSize; i++)
+						mPartList.at(i).selected = 0;
+				}
+				if (mPartList.at(item_selected).selected)
+					mPartList.at(item_selected).selected = 0;
+				else
+					mPartList.at(item_selected).selected = 1;
+				
+				int i;
+				string variablelist;
+				for (i=0; i<listSize; i++) {
+					if (mPartList.at(i).selected) {
+						variablelist += mPartList.at(i).Mount_Point + ";";
+					}
+				}
+				
 				mUpdate = 1;
 				if (selectedList.empty())
 					DataManager::SetValue(mVariable, variablelist);
@@ -281,4 +324,3 @@ void GUIPartitionList::NotifySelect(size_t item_selected)
 		}
 	}
 }
-

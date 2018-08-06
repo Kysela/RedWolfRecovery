@@ -756,6 +756,9 @@ void DataManager::SetDefaultValues()
      mPersist.SetValue(RW_MAIN_SURVIVAL_TRIGGER, "META-INF/com/miui/miui_update");      
 	  mConst.SetValue(RW_ACTUAL_BUILD_VAR, RW_BUILD);
      
+     mPersist.SetValue(RW_BACKUP_APP_DATA,"0");
+     mPersist.SetValue("tw_backup_list", "/data/app;");
+
      // End of the RedWolf variables
 
 	mPersist.SetValue(TW_INSTALL_REBOOT_VAR, "0");

@@ -1261,6 +1261,33 @@ int GUIAction::nandroid(std::string arg)
 				else
 					ret = 1; // failure
 			}
+		} else if (arg == "backup_app") {
+			string Backup_Name;
+			DataManager::GetValue(TW_BACKUP_NAME, Backup_Name);
+			string auto_gen = gui_lookup("auto_generate", "(Auto Generate)");
+			if (Backup_Name == auto_gen || Backup_Name == gui_lookup("curr_date", "(Current Date)") || Backup_Name == "0" || Backup_Name == "(" || PartitionManager.Check_Backup_Name(true) == 0) {
+				ret = PartitionManager.Run_Backup_App();
+				if (!PartitionManager.stop_backup.get_value()) {
+					if (ret == false)
+						ret = 1; // 1 for failure
+					else
+						ret = 0; // 0 for success
+					DataManager::SetValue("tw_cancel_backup", 0);
+				} else {
+					DataManager::SetValue("tw_cancel_backup", 1);
+					gui_msg("backup_cancel=Backup Cancelled");
+					ret = 0;
+				}
+			} else {
+				operation_end(1);
+				return -1;
+			}
+			DataManager::SetValue(TW_BACKUP_NAME, auto_gen);
+		} else if (arg == "restore_app") {
+			if (PartitionManager.Run_Restore_App())
+				ret = 0; // success
+			else
+				ret = 1; // failure
 		} else {
 			operation_end(1); // invalid arg specified, fail
 			return -1;

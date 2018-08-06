@@ -37,6 +37,13 @@ struct PartitionList {
 	unsigned int selected;
 };
 
+struct AppList{
+	std::string App_Name;
+	std::string Pkg_Name;
+	std::string Package_Path;
+	unsigned int selected;
+};
+
 struct Uevent_Block_Data {
 	std::string action;
 	std::string subsystem;
@@ -292,6 +299,10 @@ public:
 
 
         int Run_Restore(const string& Restore_Name);                              // Restores a backup
+
+	int Run_Backup_App();
+	int Run_Restore_App();
+
 	bool Write_ADB_Stream_Header(uint64_t partition_count);                   // Write ADB header over twrpbu FIFO
 	bool Write_ADB_Stream_Trailer();                                          // Write ADB trailer over twrpbu FIFO
 	void Set_Restore_Files(string Restore_Name);                              // Used to gather a list of available backup partitions for the user to select for a restore
@@ -320,6 +331,7 @@ public:
 	void Clean_Backup_Folder(string Backup_Folder);                           // Clean Backup Folder on Error
 	int Fix_Contexts();
 	void Get_Partition_List(string ListType, std::vector<PartitionList> *Partition_List);
+    void Get_App_List(string ListType, std::vector<AppList> *App_List);
 	int Fstab_Processed();                                                    // Indicates if the fstab has been processed or not
 	void Output_Storage_Fstab();                                              // Creates a /cache/recovery/storage.fstab file with a list of all potential storage locations for app use
 	bool Enable_MTP();                                                        // Enables MTP
@@ -366,6 +378,7 @@ private:
 	int mtp_write_fd;
 	pid_t tar_fork_pid;                                                       // PID of twrpTar fork
 	Backup_Method_enum Backup_Method;                                         // Method used for backup
+	string trim(std::string s);
 
 private:
 	std::vector<TWPartition*> Partitions;                                     // Vector list of all partitions

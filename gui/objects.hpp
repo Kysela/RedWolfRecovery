@@ -701,7 +701,8 @@ protected:
 	void SetPosition();
 
 protected:
-	std::vector<PartitionList> mList;
+	std::vector<PartitionList> mPartList;
+	std::vector<AppList> mAppList;
 	std::string ListType;
 	std::string mVariable;
 	std::string selectedList;

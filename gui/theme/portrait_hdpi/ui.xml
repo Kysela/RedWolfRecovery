@@ -247,6 +247,12 @@
 		<image name="tab_bu_encr_dis_a" filename="tab_bu_encr_dis_a" retainaspect="1"/>
 		<image name="tab_bu_encr_ena" filename="tab_bu_encr_ena" retainaspect="1"/>
 		<image name="tab_bu_encr_ena_a" filename="tab_bu_encr_ena_a" retainaspect="1"/>
+		<image name="tab_bu_app" filename="tab_bu_app" retainaspect="1"/>
+		<image name="tab_bu_app_a" filename="tab_bu_app_a" retainaspect="1"/>
+		<image name="tab_bu_restore" filename="tab_bu_restore" retainaspect="1"/>
+		<image name="tab_bu_restore_a" filename="tab_bu_restore_a" retainaspect="1"/>
+		<image name="tab_bu_apprestore" filename="tab_bu_apprestore" retainaspect="1"/>
+		<image name="tab_bu_apprestore_a" filename="tab_bu_apprestore_a" retainaspect="1"/>
 
 		<image name="cursor" filename="cursor"/>
 	</resources>
@@ -536,7 +542,10 @@
 		<variable name="fileselector_install_height" value="1140"/>
 		<variable name="fileselector_part_height" value="540"/>
 		<variable name="fileselector_wipe_height" value="450"/>
+		<variable name="fileselector_restore_height" value="1000"/>
+		<variable name="fileselector_restore_app_height" value="800"/>
 		<variable name="fileselector_backup_height" value="630"/>
+		<variable name="fileselector_backup_app_height" value="810"/>
 		<variable name="fileselector_mount_height" value="540"/>
 		<variable name="fileselector_terminal_height" value="1320"/>
 		<variable name="fileselector_separatorheight" value="2"/>

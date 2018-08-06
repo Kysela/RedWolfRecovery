@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <recovery>
 	<pages>
-<page name="main">
-<action>
+		<page name="main">
+			<action>
 				<actions>
-				<action function="set">tw_clear_destination=main2</action>
-				<action function="page">clear_vars</action>
+					<action function="set">tw_clear_destination=main2</action>
+					<action function="page">clear_vars</action>
 				</actions>
 			</action>
 		</page>
-		
-	<page name="clear_vars">
+
+		<page name="clear_vars">
 			<action>
 				<action function="clear">tw_operation_state</action>
 				<action function="set">tw_text1=</action>
@@ -2483,17 +2483,20 @@
 				<listitem name="{@wolf_boot_t2w=}">
 					<data variable="wolf_boot_t2w_check"/>
 				</listitem>
-				<listitem name="{@skip_digest_backup_chk=Skip Digest generation during backup}">
-					<data variable="tw_skip_digest_generate"/>
-				</listitem>
 				<listitem name="{@wolf_reboot_restore_finish_chk=}">
 					<data variable="rw_reboot_after_restore"/>
+				</listitem>
+				<listitem name="{@skip_digest_backup_chk=Skip Digest generation during backup}">
+					<data variable="tw_skip_digest_generate"/>
 				</listitem>
 				<listitem name="{@restore_enable_digest_chk=Enable Digest verification of backup files}">
 					<data variable="tw_skip_digest_check"/>
 				</listitem>
 				<listitem name="{@disable_backup_space_chk=Disable free space check before backup}">
 					<data variable="tw_disable_free_space"/>
+				</listitem>
+				<listitem name="{@enable_backup_comp_chk=Enable compression}">
+					<data variable="tw_use_compression"/>
 				</listitem>
 				<listitem name="{@simact_chk=Simulate actions for theme testing}">
 					<data variable="tw_simulate_actions"/>
@@ -6503,12 +6506,18 @@
 			</text>
 
 			<image>
-				<placement x="%tab3_col1_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col1_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_create_a"/>
 			</image>
+			
+			<button>
+				<placement x="%tab4_col2_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_app"/>
+				<action function="page">backup_app</action>
+			</button>
 
 			<button>
-				<placement x="%center_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col3_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_options"/>
 				<action function="page">backup_options</action>
 			</button>
@@ -6519,7 +6528,7 @@
 					<condition var1="tw_encrypt_backup" var2="0"/>
 					<condition var1="tw_enable_adb_backup" op="!=" var2="1"/>
 				</conditions>
-				<placement x="%tab3_col3_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_encr_dis"/>
 				<actions>
 					<action function="set">tw_password_not_match=0</action>
@@ -6533,7 +6542,7 @@
 					<condition var1="tw_encrypt_backup" var2="1"/>
 					<condition var1="tw_enable_adb_backup" op="!=" var2="1"/>
 				</conditions>
-				<placement x="%tab3_col3_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_encr_ena"/>
 				<actions>
 					<action function="set">tw_password_not_match=0</action>
@@ -6542,7 +6551,7 @@
 			</button>
 
 			<fill color="%text_actionbar%">
-				<placement x="0" y="%tab_indicator_y%" w="%tab3_width%" h="%tab_indicator_height%"/>
+				<placement x="0" y="%tab_indicator_y%" w="%tab4_width%" h="%tab_indicator_height%"/>
 			</fill>
 
 			<text style="caption">
@@ -6618,8 +6627,7 @@
 				<action function="page">backup_run</action>
 			</slider>
 			
-			
-<action>
+			<action>
 				<touch key="home"/>
 				<action function="home"/>
 			</action>
@@ -6630,6 +6638,111 @@
 			</action>
 		</page>
 
+		<page name="backup_app">
+			<template name="body"/>
+
+			<template name="ab_tab"/>
+
+			<template name="statusbarinfo"/>
+
+			<button>
+				<placement x="%ab_back_x%" y="%ab_y%"/>
+				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
+				<action function="page">main</action>
+			</button>
+
+			<text style="text_ab_title">
+				<placement x="%col1_x_indent%" y="%ab_bc_y%"/>
+				<text>{@backup_hdr=Backup}</text>
+			</text>
+
+			<button>
+				<placement x="%tab4_col1_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_create"/>
+				<action function="page">backup</action>
+			</button>
+			
+			<image>
+				<placement x="%tab4_col2_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_app_a"/>
+			</image>
+
+			<button>
+				<placement x="%tab4_col3_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_options"/>
+				<action function="page">backup_options</action>
+			</button>
+
+			<button>
+				<conditions>
+					<condition var1="tw_include_encrypted_backup" var2="1"/>
+					<condition var1="tw_encrypt_backup" var2="0"/>
+					<condition var1="tw_enable_adb_backup" op="!=" var2="1"/>
+				</conditions>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_encr_dis"/>
+				<actions>
+					<action function="set">tw_password_not_match=0</action>
+					<action function="page">backup_encryption1</action>
+				</actions>
+			</button>
+
+			<button>
+				<conditions>
+					<condition var1="tw_include_encrypted_backup" var2="1"/>
+					<condition var1="tw_encrypt_backup" var2="1"/>
+					<condition var1="tw_enable_adb_backup" op="!=" var2="1"/>
+				</conditions>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_encr_ena"/>
+				<actions>
+					<action function="set">tw_password_not_match=0</action>
+					<action function="page">backup_encryption1</action>
+				</actions>
+			</button>
+
+			<fill color="%text_actionbar%">
+				<placement x="tab4_ind2_x" y="%tab_indicator_y%" w="%tab4_width%" h="%tab_indicator_height%"/>
+			</fill>
+
+			<checkbox style="checkbox_big">
+				<placement x="58" y="%row2_1_y%"/>
+				<text>{@backup_app_data_chk=Backup Application data}</text>
+				<data variable="wolf_backup_app_data"/>
+			</checkbox>
+						
+			<text style="caption">
+				<placement x="%col1_x%" y="%row3_1_y%"/>
+				<text>{@installed_apps=Installed Apps}</text>
+			</text>
+
+			<partitionlist>
+				<placement x="%col1_x%" y="%row3_2_y%" w="%listbox_w%" h="%fileselector_backup_app_height%"/>
+				<data name="tw_backup_app_list"/>
+				<listtype name="backup_app"/>
+			</partitionlist>
+
+			<text style="caption">
+				<placement x="%center_x%" y="%slider_text_y%" placement="5"/>
+				<text>{@swipe_backup=Swipe to Backup}</text>
+			</text>
+
+
+            <slider>
+				<action function="page">backup_app_run</action>
+			</slider>
+			
+			<action>
+				<touch key="home"/>
+				<action function="page">main</action>
+			</action>
+
+			<action>
+				<touch key="back"/>
+				<action function="page">backup</action>
+			</action>
+		</page>
+		
 		<page name="backup_options">
 			<template name="body"/>
 
@@ -6649,13 +6762,19 @@
 			</text>
 
 			<button>
-				<placement x="%tab3_col1_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col1_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_create"/>
 				<action function="page">backup</action>
 			</button>
+			
+			<button>
+				<placement x="%tab4_col2_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_app"/>
+				<action function="page">backup_app</action>
+			</button>
 
 			<image>
-				<placement x="%center_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col3_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_options_a"/>
 			</image>
 
@@ -6665,7 +6784,7 @@
 					<condition var1="tw_encrypt_backup" var2="0"/>
 					<condition var1="tw_enable_adb_backup" op="!=" var2="1"/>
 				</conditions>
-				<placement x="%tab3_col3_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_encr_dis"/>
 				<actions>
 					<action function="set">tw_password_not_match=0</action>
@@ -6679,7 +6798,7 @@
 					<condition var1="tw_encrypt_backup" var2="1"/>
 					<condition var1="tw_enable_adb_backup" op="!=" var2="1"/>
 				</conditions>
-				<placement x="%tab3_col3_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_encr_ena"/>
 				<actions>
 					<action function="set">tw_password_not_match=0</action>
@@ -6688,7 +6807,7 @@
 			</button>
 
 			<fill color="%text_actionbar%">
-				<placement x="tab3_ind2_x" y="%tab_indicator_y%" w="%tab3_width%" h="%tab_indicator_height%"/>
+				<placement x="%center_x%" y="%tab_indicator_y%" w="%tab4_width%" h="%tab_indicator_height%"/>
 			</fill>
 
 			<text style="caption">
@@ -6821,13 +6940,19 @@
 			</text>
 
 			<button>
-				<placement x="%tab3_col1_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col1_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_create"/>
 				<action function="page">backup</action>
 			</button>
+			
+			<button>
+				<placement x="%tab4_col2_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_app"/>
+				<action function="page">backup_app</action>
+			</button>
 
 			<button>
-				<placement x="%center_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col3_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_options"/>
 				<action function="page">backup_options</action>
 			</button>
@@ -6838,7 +6963,7 @@
 					<condition var1="tw_encrypt_backup" var2="0"/>
 					<condition var1="tw_enable_adb_backup" op="!=" var2="1"/>
 				</conditions>
-				<placement x="%tab3_col3_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_encr_dis_a"/>
 			</image>
 
@@ -6848,12 +6973,12 @@
 					<condition var1="tw_encrypt_backup" var2="1"/>
 					<condition var1="tw_enable_adb_backup" op="!=" var2="1"/>
 				</conditions>
-				<placement x="%tab3_col3_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_encr_ena_a"/>
 			</image>
 
 			<fill color="%text_actionbar%">
-				<placement x="tab3_ind3_x" y="%tab_indicator_y%" w="%tab3_width%" h="%tab_indicator_height%"/>
+				<placement x="tab4_ind4_x" y="%tab_indicator_y%" w="%tab4_width%" h="%tab_indicator_height%"/>
 			</fill>
 
 			<text style="caption_hl">
@@ -6962,13 +7087,19 @@
 			</text>
 
 			<button>
-				<placement x="%tab3_col1_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col1_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_create"/>
 				<action function="page">backup</action>
 			</button>
+			
+			<button>
+				<placement x="%tab4_col2_x%" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_app"/>
+				<action function="page">backup_app</action>
+			</button>
 
 			<button>
-				<placement x="%center_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col3_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_options"/>
 				<action function="page">backup_options</action>
 			</button>
@@ -6979,7 +7110,7 @@
 					<condition var1="tw_encrypt_backup" var2="0"/>
 					<condition var1="tw_enable_adb_backup" op="!=" var2="1"/>
 				</conditions>
-				<placement x="%tab3_col3_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_encr_dis_a"/>
 			</image>
 
@@ -6989,12 +7120,12 @@
 					<condition var1="tw_encrypt_backup" var2="1"/>
 					<condition var1="tw_enable_adb_backup" op="!=" var2="1"/>
 				</conditions>
-				<placement x="%tab3_col3_x%" y="%tab_y%" placement="4"/>
+				<placement x="%tab4_col4_x%" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_encr_ena_a"/>
 			</image>
 
 			<fill color="%text_actionbar%">
-				<placement x="tab3_ind3_x" y="%tab_indicator_y%" w="%tab3_width%" h="%tab_indicator_height%"/>
+				<placement x="tab4_ind4_x" y="%tab_indicator_y%" w="%tab4_width%" h="%tab_indicator_height%"/>
 			</fill>
 
 			<text style="caption_hl">
@@ -7356,6 +7487,62 @@
 				<action function="nandroid">backup</action>
 			</action>
 		</page>
+
+		<page name="backup_app_run">
+			<template name="body"/>
+
+			<template name="progress_bar"/>
+
+			<template name="ab_ex"/>
+
+			<template name="statusbarinfo"/>
+			
+			<image>
+				<placement x="%ab_back_x%" y="%ab_y%"/>
+				<image resource="actionbar_back"/>
+			</image>
+
+			<text style="text_ab_title">
+				<placement x="%col1_x_indent%" y="%ab_bc_y%"/>
+				<text>{@backup_hdr=Backup}</text>
+			</text>
+
+			<text style="text_ab_title">
+				<placement x="%col1_x_indent%" y="%row1_2_y%" placement="2"/>
+				<text>%tw_operation%</text>
+			</text>
+
+			<text style="text_ab_subtitle">
+				<placement x="%col1_x_indent%" y="%row1_2_y%"/>
+				<text>{@backup_app_progress=Backing up App: }%tw_app%</text>
+			</text>
+
+			<template name="action_page_console"/>
+
+			<text style="caption">
+				<placement x="%col1_x%" y="%row7_1a_y%"/>
+				<text>{@progress=Progress}</text>
+			</text>
+
+			<text style="text_body2">
+				<placement x="%col1_x%" y="%row7_2a_y%"/>
+				<text>%tw_size_progress%</text>
+			</text>
+
+			<action>
+				<condition var1="tw_operation_state" var2="1"/>
+				<actions>
+					<action function="set">tw_back=backup_app</action>
+					<action function="set">tw_complete_text1={@backup_complete=Backup Complete}</action>
+					<action function="set">tw_show_reboot=1</action>
+					<action function="page">backup_action_complete</action>
+				</actions>
+			</action>
+
+			<action>
+				<action function="nandroid">backup_app</action>
+			</action>
+		</page>
 		
 		<page name="backup_action_complete">
 			<template name="body"/>
@@ -7439,7 +7626,7 @@
 			</action>
 		</page>
 
-		<page name="restore">
+		<page name="restore_1">
 			<template name="body"/>
 
 			<fileselector style="fileselector_b">
@@ -7477,7 +7664,7 @@
 				<text>{@restore_hdr=Restore}</text>
 			</text>
 
-<button>
+			<button>
 				<placement x="%ab_btn2_x%" y="%ab_y%"/>
 				<image resource="actionbar_sort" highlightresource="actionbar_sort_hl"/>
 				<action function="overlay">menu_sort</action>
@@ -7539,6 +7726,197 @@
 			</action>
 		</page>
 
+		<page name="restore">
+			<template name="body"/>
+			
+			<fileselector style="fileselector_b">
+				<condition var1="list_font" var2="big"/>
+				<placement x="%col1_x%" y="%row2_3_y%" w="%fileselector_width%" h="%fileselector_restore_height%"/>
+				<sort name="tw_gui_sort_order"/>
+				<filter folders="1" files="0" nav="0" adbbackup="1"/>
+				<path name="tw_backups_folder"/>
+				<data name="tw_restore" default=""/>
+				<selection name="tw_restore_name"/>
+			</fileselector>
+
+			<fileselector style="fileselector_s">
+				<condition var1="list_font" var2="small"/>
+				<placement x="%col1_x%" y="%row2_3_y%" w="%fileselector_width%" h="%fileselector_restore_height%"/>
+				<sort name="tw_gui_sort_order"/>
+				<filter folders="1" files="1" nav="0" extn=".ab" adbbackup="1"/>
+				<path name="tw_backups_folder"/>
+				<data name="tw_restore" default=""/>
+				<selection name="tw_restore_name"/>
+			</fileselector>
+
+			<template name="ab_tab"/>
+
+			<template name="statusbarinfo"/>
+
+			<button>
+				<placement x="%ab_back_x%" y="%ab_y%"/>
+				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
+				<action function="home"/>
+			</button>
+
+			<text style="text_ab_title">
+				<placement x="%col1_x_indent%" y="%ab_bc_y%"/>
+				<text>{@restore_hdr=Restore}</text>
+			</text>
+
+			<image>
+				<placement x="305" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_restore_a"/>
+			</image>
+			
+			<button>
+				<placement x="810" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_apprestore"/>
+				<action function="page">restore_app</action>
+			</button>
+
+			<fill color="%text_actionbar%">
+				<placement x="0" y="%tab_indicator_y%" w="%tab2_width%" h="%tab_indicator_height%"/>
+			</fill>
+
+			<button>
+				<placement x="%ab_btn2_x%" y="%ab_y%"/>
+				<image resource="actionbar_sort" highlightresource="actionbar_sort_hl"/>
+				<action function="overlay">menu_sort</action>
+			</button>
+
+			<button>
+				<condition var1="list_font" var2="big"/>
+				<placement x="%ab_btn1_x%" y="%ab_y%"/>
+				<image resource="actionbar_font_big" highlightresource="actionbar_font_big_hl"/>
+				<actions>
+					<action function="set">list_font=small</action>
+				</actions>
+			</button>
+
+			<button>
+				<condition var1="list_font" var2="small"/>
+				<placement x="%ab_btn1_x%" y="%ab_y%"/>
+				<image resource="actionbar_font_small" highlightresource="actionbar_font_small_hl"/>
+				<actions>
+					<action function="set">list_font=big</action>
+				</actions>
+			</button>
+
+			<text style="text_ab_title">
+				<placement x="%col1_x_indent%" y="%row2_1_y%" placement="2"/>
+				<text>{@sel_backup_hdr=Select Backup}</text>
+			</text>
+
+			<text style="text_ab_subtitle">
+				<placement x="%col1_x_indent%" y="%row2_1a_y%"/>
+				<text>%tw_storage_display_name% (%tw_storage_free_size% MB)</text>
+			</text>
+
+			<button style="btn_raised">
+				<placement x="%btn_raised_left_x%" y="%row_btn1_y%"/>
+				<text>{@select_storage_btn=SELECT STORAGE}</text>
+				<actions>
+					<action function="set">tw_back=restore</action>
+					<action function="overlay">dialog_storage</action>
+				</actions>
+			</button>
+
+			<action>
+				<condition var1="tw_restore" op="modified"/>
+				<actions>
+					<action function="readBackup"/>
+					<action function="page">restore_read</action>
+				</actions>
+			</action>
+
+			<action>
+				<touch key="home"/>
+				<action function="home"/>
+			</action>
+
+			<action>
+				<touch key="back"/>
+				<action function="home"/>
+			</action>
+		</page>
+
+		<page name="restore_app">
+			<template name="body"/>
+
+			<template name="ab_tab"/>
+
+			<template name="statusbarinfo"/>
+
+			<button>
+				<placement x="%ab_back_x%" y="%ab_y%"/>
+				<image resource="actionbar_back" highlightresource="actionbar_back_hl"/>
+				<action function="page">main</action>
+			</button>
+
+			<text style="text_ab_title">
+				<placement x="%col1_x_indent%" y="%ab_bc_y%"/>
+				<text>{@restore_hdr=Restore}</text>
+			</text>
+
+			<button>
+				<placement x="305" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_restore"/>
+				<action function="page">restore</action>
+			</button>
+			
+			<image>
+				<placement x="810" y="%tab_y%" placement="4"/>
+				<image resource="tab_bu_apprestore_a"/>
+			</image>
+
+			<fill color="%text_actionbar%">
+				<placement x="540" y="%tab_indicator_y%" w="%tab2_width%" h="%tab_indicator_height%"/>
+			</fill>
+
+			<text style="caption">
+				<placement x="%col1_x%" y="%row2_1_y%" placement="2"/>
+				<text>{@select_apps_restore=Select Apps to Restore}</text>
+			</text>
+
+			<partitionlist>
+				<placement x="%col1_x%" y="%row2_1a_y%" w="%listbox_w%" h="%fileselector_restore_app_height%"/>
+				<data name="tw_restore_app_selected"/>
+				<listtype name="restore_app"/>
+			</partitionlist>
+
+			<checkbox style="checkbox_big">
+				<placement x="%col1_x%" y="%row6_3a_y%"/>
+				<text>{@wolf_reboot_restore_finish_chk=Reboot After Restore Finished}</text>
+				<data variable="rw_reboot_after_restore"/>
+			</checkbox>
+			
+			<checkbox style="checkbox_big">
+				<placement x="%col1_x%" y="1430"/>
+				<text>{@restore_app_data=Restore App with Data}</text>
+				<data variable="rw_restore_app_data"/>
+			</checkbox>
+			
+			<text style="caption">
+				<placement x="%center_x%" y="%slider_text_y%" placement="5"/>
+				<text>{@swipe_restore=Swipe to Restore}</text>
+			</text>
+
+            <slider>
+				<action function="page">restore_run_app</action>
+			</slider>
+
+			<action>
+				<touch key="home"/>
+				<action function="page">main</action>
+			</action>
+
+			<action>
+				<touch key="back"/>
+				<action function="page">restore</action>
+			</action>
+		</page>
+
 		<page name="restore_read">
 			<action>
 				<condition var1="tw_restore_encrypted" var2="1"/>
@@ -7552,6 +7930,7 @@
 				<condition var1="tw_restore_encrypted" var2="0"/>
 				<actions>
 					<action function="page">restore_select</action>
+					<action function="set">rw_refresh_restore=1</action>
 				</actions>
 			</action>
 		</page>
@@ -7792,11 +8171,13 @@
 			</text>
 
 			<text style="caption">
+				<condition var1="tw_restore_name" op="!=" var2="Apps"/>
 				<placement x="%col1_x%" y="%row2_2_y%"/>
 				<text>{@restore_backup_date=Backup Date}</text>
 			</text>
 
 			<text style="text_body2">
+				<condition var1="tw_restore_name" op="!=" var2="Apps"/>
 				<placement x="%col1_x%" y="%row2_3_y%"/>
 				<text>%tw_restore_file_date%</text>
 			</text>
@@ -7812,8 +8193,7 @@
 				<listtype name="restore"/>
 			</partitionlist>
 
-
-<text style="caption">
+			<text style="caption">
 				<placement x="%col1_x%" y="%row6_2a_y%"/>
 				<text>{@options_hdr=Options}</text>
 			</text>
@@ -7830,13 +8210,13 @@
 				<text>{@restore_enable_digest_chk=Enable Digest verification of backups}</text>
 				<data variable="tw_skip_digest_check"/>
 			</checkbox>
-			
+
 			<text style="caption">
 				<placement x="%center_x%" y="%slider_text_y%" placement="5"/>
 				<text>{@swipe_restore=Swipe to Restore}</text>
 			</text>
 
-             <slider>
+            <slider>
 				<action function="page">restore_run</action>
 			</slider>
 
@@ -8078,6 +8458,76 @@
 			
 			<action>
 				<action function="nandroid">restore</action>
+			</action>
+		</page>
+		
+		<page name="restore_run_app">
+			<template name="body"/>
+
+			<template name="progress_bar"/>
+
+			<template name="ab_ex"/>
+
+			<template name="statusbarinfo"/>
+
+			<image>
+				<placement x="%ab_back_x%" y="%ab_y%"/>
+				<image resource="actionbar_back"/>
+			</image>
+
+			<text style="text_ab_title">
+				<placement x="%col1_x_indent%" y="%ab_bc_y%"/>
+				<text>{@restore_hdr=Restore}</text>
+			</text>
+
+			<text style="text_ab_title">
+				<placement x="%col1_x_indent%" y="%row1_2_y%" placement="2"/>
+				<text>%tw_operation%</text>
+			</text>
+
+			<text style="text_ab_subtitle">
+				<placement x="%col1_x_indent%" y="%row1_2_y%"/>
+				<text>%tw_partition%</text>
+			</text>
+
+			<template name="action_page_console"/>
+
+			<text style="caption">
+				<placement x="%col1_x%" y="%row7_1a_y%"/>
+				<text>{@progress=Progress}</text>
+			</text>
+
+			<text style="text_body2">
+				<placement x="%col1_x%" y="%row7_2a_y%"/>
+				<text>%tw_size_progress%</text>
+			</text>
+			
+			<action>
+				<conditions>
+					<condition var1="tw_operation_state" var2="1"/>
+					<condition var1="tw_operation_status" var2="0"/>
+				</conditions>
+				<actions>
+					<action function="set">tw_back=restore_select</action>
+					<action function="set">tw_complete_text1={@restore_complete=Restore completed}</action>
+					<action function="page">restore_action_complete</action>
+				</actions>
+			</action>
+
+			<action>
+				<conditions>
+					<condition var1="tw_operation_state" var2="1"/>
+					<condition var1="tw_operation_status" var2="1"/>
+				</conditions>
+				<actions>
+					<action function="set">tw_back=restore_select</action>
+					<action function="set">tw_complete_text1={@restore_complete=Restore completed}</action>
+					<action function="page">restore_action_complete</action>
+				</actions>
+			</action>
+			
+			<action>
+				<action function="nandroid">restore_app</action>
 			</action>
 		</page>
 
@@ -11238,8 +11688,8 @@
 				<touch key="power+volup"/>
 				<action function="screenshot"/>
 			</action>
-
-<action>
+			
+			<action>
 				<touch key="power+voldown"/>
 				<action function="screenshot"/>
 			</action>
