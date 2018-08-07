@@ -7892,6 +7892,7 @@
 			</checkbox>
 			
 			<checkbox style="checkbox_big">
+				<condition var1="rw_restore_data" var2="1"/>
 				<placement x="%col1_x%" y="1430"/>
 				<text>{@restore_app_data=Restore App with Data}</text>
 				<data variable="rw_restore_app_data"/>

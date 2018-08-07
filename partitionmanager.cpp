@@ -1034,6 +1034,7 @@ int TWPartitionManager::Run_Backup_App() {
 	int index = 0;
 	ofstream info;
   	info.open (info_file + ".tmp");
+	info << "restore_data:" << backup_data << "\n";
 	for (const AppList& app : Selected_Apps){
 		index++;
 		DataManager::SetProgress(index/app_count);
@@ -2509,18 +2510,24 @@ void TWPartitionManager::Get_App_List(string ListType, std::vector<AppList> *App
 			}
 			
 			std::string line;
+			int lc = 0;
 			while (std::getline(in, line)) {
 				if (trim(line) != "") {
 					std::vector<std::string> splited = TWFunc::split_string(line,':',false);
-					
-					struct AppList app;
-					app.App_Name = trim(splited[0]);
-					app.Pkg_Name = trim(splited[1]);
-					app.Package_Path =  trim(splited[2]);
-					app.selected = 0;
-					
-					App_List->push_back(app);
+
+					if (lc != 0) {
+						struct AppList app;
+						app.App_Name = trim(splited[0]);
+						app.Pkg_Name = trim(splited[1]);
+						app.Package_Path =  trim(splited[2]);
+						app.selected = 0;
+						
+						App_List->push_back(app);
+					} else {
+						DataManager::SetValue("rw_restore_data", splited[1]);
+					}
 				}
+				lc++;
 			}
 			
 			in.close();
