@@ -7772,6 +7772,7 @@
 			<button>
 				<placement x="810" y="%tab_y%" placement="4"/>
 				<image resource="tab_bu_apprestore"/>
+				<action function="set">rw_refresh_restore=1</action>
 				<action function="page">restore_app</action>
 			</button>
 
@@ -7931,7 +7932,6 @@
 				<condition var1="tw_restore_encrypted" var2="0"/>
 				<actions>
 					<action function="page">restore_select</action>
-					<action function="set">rw_refresh_restore=1</action>
 				</actions>
 			</action>
 		</page>
