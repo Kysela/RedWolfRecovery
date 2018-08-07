@@ -813,6 +813,8 @@
     <string name="selected_apps"> * No of selected apps : {1}</string>
     <string name="no_apps_selected">No apps selected for backup</string>
     <string name="backingup_app"> * Backingup app {1}...</string>
+	<string name="backingup_data">   - Backingup data...</string>
+	<string name="backingup_data_null">   - No app data to backup</string>
     <string name="backup_app_error">   - Unable to backup app {1}</string>
     <string name="backup_app_move_failed"> * Unable to move files</string>
     <string name="backup_app_finished">[BACKUP FINISHED]</string>

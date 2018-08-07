@@ -1042,10 +1042,17 @@ int TWPartitionManager::Run_Backup_App() {
 		
 		std::string command;
 		if (index == 1)
-			command = "gnutar --selinux --xattrs --transform='flags=r;s|base.apk|" + app.App_Name + ".apk|' -cpf " + backup_file_tar + ".tmp -C /data/app/" + app.Package_Path + " base.apk";
+			command = "gnutar --selinux --xattrs --transform='flags=r;s|base.apk|" + app.App_Name + ".apk|' -cpf " + backup_file_tar + ".tmp -C /data/app/" + app.Package_Path + " base.apk ";
 		else
-			command = "gnutar --selinux --xattrs --transform='flags=r;s|base.apk|" + app.App_Name + ".apk|' -rpf " + backup_file_tar + ".tmp -C /data/app/" + app.Package_Path + " base.apk";
-		if (backup_data) command += " /data/data/" + app.Pkg_Name;
+			command = "gnutar --selinux --xattrs --transform='flags=r;s|base.apk|" + app.App_Name + ".apk|' -rpf " + backup_file_tar + ".tmp -C /data/app/" + app.Package_Path + " base.apk ";
+		
+		string data_path = "/data/data/" + app.Pkg_Name;
+		if (TWFunc::Path_Exists(data_path)) {
+			if (backup_data) command += data_path;
+			gui_msg(Msg("backingup_data=   - Backingup data..."));
+		}
+		else
+			gui_msg(Msg("backingup_data_null=   - No app data to backup"));
 		
 		LOGINFO("running command %s", command.c_str());
 		
