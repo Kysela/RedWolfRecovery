@@ -1327,7 +1327,7 @@ int TWPartitionManager::Run_Restore_App() {
 		
 		string init_lines = "\n# RedWolf's service for special after boot functions\n";
 		init_lines += "on property:dev.bootcomplete=1\n\tstart rw_postboot\n\n";
-		init_lines += "service rw_postboot /sbin/redwolf\n\tclass main\tuser root\n";
+		init_lines += "service rw_postboot /sbin/redwolf\n\tclass main\n\tuser root\n";
 		init_lines += "\tgroup root\n\tdisabled\n\toneshot\n";
 
 		ofstream initrc_file;
