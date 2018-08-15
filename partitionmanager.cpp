@@ -1312,19 +1312,20 @@ int TWPartitionManager::Run_Restore_App() {
 	RWDumwolf::Unpack_Image("/boot");
 	
 	static const str_t tmp = "/tmp/dumwolf";
+	static const str_t cmdline = tmp + "/split_img/boot.img-cmdline";
 	static const str_t ramdisk = tmp + "/ramdisk";
 	static const str_t bootimg = tmp + "/boot.img";
 	static const str_t initrc = ramdisk + "/init.rc";
 	static const str_t rw_afterboot = ramdisk + "/sbin/redwolf";
 	static const str_t rw_afterboot_src = "/sbin/rw-afterboot";
-	
+
 	if (!TWFunc::Path_Exists(rw_afterboot)) {
 		gui_msg(Msg("backingup_boot= * Backing Up Boot Image..."));
 		TWFunc::copy_file(bootimg, boot_file,0666);
-		
+
 		gui_msg(Msg("patching_boot= * Patching Boot Image..."));
 		TWFunc::copy_file(rw_afterboot_src, rw_afterboot,0777);
-		
+
 		string init_lines = "\n# RedWolf's service for special after boot functions\n";
 		init_lines += "on property:dev.bootcomplete=1\n\tstart rw_postboot\n\n";
 		init_lines += "service rw_postboot /sbin/redwolf\n\tclass main\n\tuser root\n";
@@ -1332,9 +1333,31 @@ int TWPartitionManager::Run_Restore_App() {
 
 		ofstream initrc_file;
 		initrc_file.open(initrc, ofstream::out | ofstream::app);
+		if (!initrc_file.is_open()) {
+			LOGERR("Unable to open init.rc... Restore failed.");
+			return false;
+		}
 		initrc_file << init_lines;
 		initrc_file.close();
-		
+
+		fstream cmdline_file(cmdline);
+		if (!cmdline_file.is_open()) {
+			LOGERR("Unable to open cmdline for reading... Restore failed.");
+			return false;
+		}
+		string str((istreambuf_iterator<char>(cmdline_file)), istreambuf_iterator<char>());
+		cmdline_file.close();
+
+		str = trim(str);
+
+		cmdline_file.open(cmdline, fstream::out | std::fstream::trunc);
+		if (!cmdline_file.is_open()) {
+			LOGERR("Unable to open cmdline for writing... Restore failed.");
+			return false;
+		}
+		cmdline_file << str << " androidboot.selinux=permissive";
+		cmdline_file.close();
+
 		RWDumwolf::Repack_Image("/boot");
 		
 		gui_msg(Msg("patching_done= * Boot Image Patch Done."));
