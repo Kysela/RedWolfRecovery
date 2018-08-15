@@ -1050,7 +1050,7 @@ int TWFunc::Set_Brightness(std::string brightness_value)
 	int result = -1;
 
 	if (DataManager::GetIntValue("tw_has_brightnesss_file")) {
-		brightness_value = std::to_string(DataManager::GetIntValue("tw_brightness_max") * (int)atoi(brightness_value.c_str()) / 100);
+		DataManager::SetValue("tw_brightness", brightness_value);
 		LOGINFO("TWFunc::Set_Brightness: Setting brightness control to %s\n", brightness_value.c_str());
 		result = TWFunc::write_to_file(DataManager::GetStrValue("tw_brightness_file"), brightness_value);
 #ifdef TW_SECONDARY_BRIGHTNESS_PATH

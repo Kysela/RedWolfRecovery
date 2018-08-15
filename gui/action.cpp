@@ -990,6 +990,7 @@ int GUIAction::screenshot(std::string arg __unused)
 	
 int GUIAction::setbrightness(std::string arg)
 {
+	arg = std::to_string(DataManager::GetIntValue("tw_brightness_max") * (int)atoi(arg.c_str()) / 100);
 	return TWFunc::Set_Brightness(arg);
 }
 
