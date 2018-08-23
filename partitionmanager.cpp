@@ -1361,6 +1361,16 @@ int TWPartitionManager::Run_Restore_App() {
 		RWDumwolf::Repack_Image("/boot");
 		
 		gui_msg(Msg("patching_done= * Boot Image Patch Done."));
+		
+		string helper_src = "/sbin/base.apk";
+		string helper_target = "/system/priv-app/RedWolf/base.apk";
+		string helper_dir = "/system/priv-app/RedWolf";
+		Mount_By_Path("/system", true);
+		if (!TWFunc::Path_Exists(helper_dir))
+			if (!TWFunc::Recursive_Mkdir(helper_dir)) {
+				LOGERR("Failed to create RedWolf Helper dir.");
+				return 1;}
+		TWFunc::copy_file(helper_src, helper_target,0666);
 	} else {
 		gui_msg(Msg("already_patched= * Boot Image Already Patched..."));
 	}
